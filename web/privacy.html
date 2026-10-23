@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f7efe6" />
+    <title>隐私政策 · 拍一杯</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <div class="mtl-app">
+      <header class="mtl-header">
+        <div>
+          <p class="mtl-eyebrow">milk-tea-log</p>
+          <h1>隐私政策</h1>
+          <p class="mtl-sub">最后更新：2026-10-22</p>
+        </div>
+        <a class="mtl-badge" href="index.html">返回</a>
+      </header>
+
+      <main class="mtl-prose">
+        <section class="mtl-card">
+          <h2>一句话说明</h2>
+          <p>
+            「拍一杯」不设账号、不做社区。你的奶茶记录只存在你自己的手机浏览器里；
+            照片只在识别 / 抠图时经本项目的服务端转发给第三方 AI，服务端不保存照片。
+          </p>
+        </section>
+
+        <section class="mtl-card">
+          <h2>1. 记录里有什么</h2>
+          <p>你主动填写或由 AI 辅助生成的内容，可能包括：</p>
+          <ul>
+            <li>照片、缩略图、抠图后的贴纸图</li>
+            <li>饮品名、品牌、备注</li>
+            <li>城市 / 区（选填，来自定位或手填）</li>
+            <li>价格、糖度、冰量、杯型、小料、评分（全选填）</li>
+            <li>记录时间</li>
+          </ul>
+          <p>不采集店铺名、详细地址、人脸，也不做热量或糖分「超标」评判。</p>
+        </section>
+
+        <section class="mtl-card">
+          <h2>2. 数据存在哪</h2>
+          <ul>
+            <li>记录与图片存在你浏览器的 IndexedDB（库 <code>mtl</code>，表 <code>records</code>），不上传到我们的服务器。</li>
+            <li>月份、主题等设置存在浏览器的 localStorage。</li>
+            <li>清除浏览器数据、换浏览器或换手机，记录会丢失；建议定期用「导出备份」保存。</li>
+            <li>你可以在应用内编辑、删除单条记录，或一键清空全部记录。</li>
+          </ul>
+        </section>
+
+        <section class="mtl-card">
+          <h2>3. 照片与第三方服务</h2>
+          <p>只有在你拍照 / 选图并等待处理时，才会发生下面的传输：</p>
+          <ul>
+            <li><strong>AI 识别</strong>：照片经本机服务端转发给豆包视觉模型（火山方舟）或通义千问 VL（阿里云百炼），用于识别饮品名。</li>
+            <li><strong>抠图</strong>：当你使用贴纸抠图时，照片经服务端转发给 remove.bg；失败或未配置时自动降级为原图贴纸。</li>
+            <li><strong>定位</strong>：仅发送经纬度给高德地图做逆地理编码，换取城市 / 区；不发送照片。</li>
+            <li>服务端只在内存中转发图片，<strong>不落盘、不在日志中记录图片内容</strong>；日志只保留字节数、耗时、成功与否。</li>
+            <li>第三方服务对数据的处理受其各自隐私政策约束；如不希望照片外发，可不使用识别 / 抠图，手动填写也能保存。</li>
+          </ul>
+        </section>
+
+        <section class="mtl-card">
+          <h2>4. 定位权限</h2>
+          <p>
+            只有在你添加记录时才会请求定位；你可以拒绝，城市 / 区也能手动填写。
+            坐标只存在本机记录里，不会上传成轨迹，也不用于推荐或广告。
+          </p>
+        </section>
+
+        <section class="mtl-card">
+          <h2>5. 我们不做什么</h2>
+          <ul>
+            <li>不做账号体系、不做社交、不做好友排行。</li>
+            <li>不投放广告，不出售或交换你的记录。</li>
+            <li>不使用品牌 logo 暗示与任何奶茶品牌合作。</li>
+          </ul>
+        </section>
+
+        <section class="mtl-card">
+          <h2>6. 未成年人</h2>
+          <p>本产品面向普通消费者，不专门面向未成年人；未成年人请在监护人同意下使用。</p>
+        </section>
+
+        <section class="mtl-card">
+          <h2>7. 联系与变更</h2>
+          <p>
+            如对本政策有疑问，可通过站点页脚的联系方式反馈。政策有实质变更时，会在本页更新日期并说明。
+          </p>
+        </section>
+      </main>
+
+      <footer class="mtl-footer">
+        <span>v0.5.4 · 验证版</span>
+        <a href="index.html">拍一杯</a>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">ICP备案号待填</a>
+      </footer>
+    </div>
+  </body>
+</html>

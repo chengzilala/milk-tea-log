@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7efe6">
+  <title>拍一杯 — 奶茶印章地图</title>
+  <link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="mtl-app">
+    <header class="mtl-header">
+      <div>
+        <p class="mtl-eyebrow">milk-tea-log · H5 验证版</p>
+        <h1>拍一杯</h1>
+        <p class="mtl-sub">拍一下，收进你的奶茶印章地图</p>
+      </div>
+      <div class="mtl-header-actions">
+        <div class="mtl-badge" id="mtl-total-badge">0 杯</div>
+        <button id="mtl-me-open" class="mtl-me-btn" type="button">我的</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="view-capture" class="mtl-view is-active">
+        <div id="mtl-capture-empty" class="mtl-card mtl-capture-hero">
+          <div class="mtl-hero-stamp" aria-hidden="true">拍</div>
+          <h2>今天喝哪杯？</h2>
+          <p class="mtl-hero-copy">拍一张杯贴、杯身或小票，自动认下饮品名。</p>
+          <div class="mtl-capture-actions">
+            <label class="mtl-btn mtl-btn-primary" for="mtl-camera-input">拍一杯</label>
+            <label class="mtl-btn" for="mtl-gallery-input">从相册选</label>
+          </div>
+          <input id="mtl-camera-input" type="file" accept="image/*" capture="environment" hidden>
+          <input id="mtl-gallery-input" type="file" accept="image/*" hidden>
+          <p class="mtl-hint">照片只用于本次识别，服务端不保存；识别失败也可以手动写。</p>
+        </div>
+
+        <div id="mtl-capture-working" class="mtl-card" hidden>
+          <div class="mtl-preview-wrap">
+            <img id="mtl-preview" alt="奶茶照片预览">
+          </div>
+          <ul class="mtl-steps">
+            <li id="mtl-step-ai" class="mtl-step"><span class="mtl-dot"></span>识别饮品名</li>
+            <li id="mtl-step-geo" class="mtl-step"><span class="mtl-dot"></span>获取城市 / 区</li>
+            <li id="mtl-step-save" class="mtl-step"><span class="mtl-dot"></span>生成印章</li>
+          </ul>
+          <p id="mtl-working-hint" class="mtl-hint">正在处理这张照片…</p>
+        </div>
+
+        <form id="mtl-confirm-card" class="mtl-card mtl-confirm" hidden>
+          <div class="mtl-stamp-preview" id="mtl-confirm-preview">
+            <div class="mtl-stamp-ring" aria-hidden="true"></div>
+            <img id="mtl-confirm-photo" alt="这杯奶茶">
+            <span id="mtl-confirm-cutout" class="mtl-cutout-badge" hidden>抠图中…</span>
+          </div>
+          <div class="mtl-ai-line">
+            <span id="mtl-ai-badge" class="mtl-pill">AI 猜的</span>
+            <span id="mtl-ai-hint" class="mtl-muted"></span>
+          </div>
+          <label>饮品名
+            <input name="drinkName" id="mtl-drink-name" placeholder="如：伯牙绝弦" autocomplete="off">
+          </label>
+          <div id="mtl-recent-wrap" class="mtl-recent" hidden>
+            <span class="mtl-recent-label">最近常喝</span>
+            <div id="mtl-recent-chips" class="mtl-chips"></div>
+          </div>
+          <div class="mtl-row">
+            <label>城市
+              <input name="city" id="mtl-city" placeholder="自动定位 / 可手填" autocomplete="off">
+            </label>
+            <label>区
+              <input name="district" id="mtl-district" placeholder="自动定位 / 可手填" autocomplete="off">
+            </label>
+          </div>
+          <label>备注 / 心情
+            <input name="note" id="mtl-note" placeholder="选填" autocomplete="off">
+          </label>
+          <details class="mtl-more">
+            <summary>更多信息（选填）</summary>
+            <div class="mtl-more-body">
+              <div class="mtl-row">
+                <label>品牌
+                  <input id="mtl-brand" placeholder="如：霸王茶姬" autocomplete="off">
+                </label>
+                <label>价格（元）
+                  <input id="mtl-price" type="number" min="0" step="0.1" inputmode="decimal" placeholder="如：18">
+                </label>
+              </div>
+              <div class="mtl-row">
+                <label>糖度
+                  <select id="mtl-sugar">
+                    <option value="">不填</option>
+                    <option value="全糖">全糖</option>
+                    <option value="七分">七分</option>
+                    <option value="半糖">半糖</option>
+                    <option value="三分">三分</option>
+                    <option value="无糖">无糖</option>
+                    <option value="不另外加糖">不另外加糖</option>
+                  </select>
+                </label>
+                <label>冰量
+                  <select id="mtl-ice">
+                    <option value="">不填</option>
+                    <option value="正常冰">正常冰</option>
+                    <option value="少冰">少冰</option>
+                    <option value="去冰">去冰</option>
+                    <option value="热">热</option>
+                  </select>
+                </label>
+              </div>
+              <div class="mtl-row">
+                <label>杯型
+                  <select id="mtl-cup">
+                    <option value="">不填</option>
+                    <option value="中杯">中杯</option>
+                    <option value="大杯">大杯</option>
+                    <option value="超大杯">超大杯</option>
+                  </select>
+                </label>
+                <label>小料
+                  <input id="mtl-toppings" placeholder="如：珍珠" autocomplete="off">
+                </label>
+              </div>
+              <div class="mtl-rating">
+                <span class="mtl-rating-label">评分</span>
+                <div id="mtl-rating" class="mtl-stars" role="group" aria-label="评分" data-value="0">
+                  <button type="button" data-star="1" aria-label="1 星">★</button>
+                  <button type="button" data-star="2" aria-label="2 星">★</button>
+                  <button type="button" data-star="3" aria-label="3 星">★</button>
+                  <button type="button" data-star="4" aria-label="4 星">★</button>
+                  <button type="button" data-star="5" aria-label="5 星">★</button>
+                </div>
+                <button type="button" id="mtl-rating-clear" class="mtl-link">清除</button>
+              </div>
+            </div>
+          </details>
+          <div class="mtl-confirm-actions">
+            <button type="button" id="mtl-retake" class="mtl-btn">重拍</button>
+            <button type="submit" class="mtl-btn mtl-btn-primary">收进这个月</button>
+          </div>
+          <p id="mtl-form-status" class="mtl-status" role="status"></p>
+        </form>
+      </section>
+
+      <section id="view-archive" class="mtl-view">
+        <div class="mtl-card">
+          <div class="mtl-section-head">
+            <h2>我的印章</h2>
+            <input id="mtl-month" type="month" class="mtl-month">
+          </div>
+          <div id="mtl-archive-views" class="mtl-seg" role="group" aria-label="归档视图">
+            <button type="button" data-archive-view="stamp" class="is-active">印章</button>
+            <button type="button" data-archive-view="sticker">贴纸册</button>
+            <button type="button" data-archive-view="list">清单</button>
+          </div>
+          <p id="mtl-archive-summary" class="mtl-summary">这个月 0 杯</p>
+          <div id="mtl-stamp-grid" class="mtl-stamp-grid"></div>
+          <div id="mtl-sticker-grid" class="mtl-sticker-grid" hidden></div>
+          <div id="mtl-list" class="mtl-list" hidden></div>
+          <p id="mtl-empty" class="mtl-empty">这个月还没有印章，拍一杯试试。</p>
+        </div>
+        <div class="mtl-card mtl-actions mtl-actions-three">
+          <button id="mtl-export" class="mtl-btn" type="button">导出备份</button>
+          <button id="mtl-import" class="mtl-btn" type="button">导入备份</button>
+          <button id="mtl-clear" class="mtl-btn mtl-btn-danger" type="button">清空记录</button>
+          <input id="mtl-import-input" type="file" accept="application/json,.json" hidden>
+        </div>
+      </section>
+
+      <section id="view-map" class="mtl-view">
+        <div class="mtl-card mtl-map-card">
+          <div class="mtl-section-head">
+            <h2>奶茶印章地图</h2>
+            <span id="mtl-map-count" class="mtl-muted"></span>
+          </div>
+          <div id="mtl-map" class="mtl-map"></div>
+          <p class="mtl-hint">地图只显示你自己的奶茶印章，不做探店推荐。</p>
+          <p id="mtl-map-empty" class="mtl-empty">还没有带位置的印章。</p>
+        </div>
+      </section>
+    </main>
+
+    <nav class="mtl-tabs" aria-label="主导航">
+      <button class="mtl-tab is-active" data-view="capture" type="button">拍一杯</button>
+      <button class="mtl-tab" data-view="archive" type="button">印章</button>
+      <button class="mtl-tab" data-view="map" type="button">地图</button>
+    </nav>
+
+    <footer class="mtl-footer">
+      <span>v0.5.4 · 验证版 · 数据只存在本机</span>
+      <a href="privacy.html">隐私政策</a>
+      <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">ICP备案号待填</a>
+    </footer>
+  </div>
+
+  <div id="mtl-detail" class="mtl-modal" hidden>
+    <div class="mtl-modal-backdrop" data-close="1"></div>
+    <div class="mtl-sheet" role="dialog" aria-modal="true" aria-labelledby="mtl-detail-title">
+      <div class="mtl-sheet-head">
+        <h3 id="mtl-detail-title">这枚印章</h3>
+        <button type="button" class="mtl-icon-btn" data-close="1" aria-label="关闭">×</button>
+      </div>
+      <img id="mtl-detail-photo" class="mtl-detail-photo" alt="这杯奶茶">
+      <label>饮品名
+        <input id="mtl-detail-name" autocomplete="off">
+      </label>
+      <label>日期
+        <input id="mtl-detail-date" type="date">
+      </label>
+      <div class="mtl-row">
+        <label>品牌
+          <input id="mtl-detail-brand" autocomplete="off">
+        </label>
+        <label>价格（元）
+          <input id="mtl-detail-price" type="number" min="0" step="0.1" inputmode="decimal">
+        </label>
+      </div>
+      <div class="mtl-row">
+        <label>城市
+          <input id="mtl-detail-city" autocomplete="off">
+        </label>
+        <label>区
+          <input id="mtl-detail-district" autocomplete="off">
+        </label>
+      </div>
+      <div class="mtl-row">
+        <label>糖度
+          <select id="mtl-detail-sugar">
+            <option value="">不填</option>
+            <option value="全糖">全糖</option>
+            <option value="七分">七分</option>
+            <option value="半糖">半糖</option>
+            <option value="三分">三分</option>
+            <option value="无糖">无糖</option>
+            <option value="不另外加糖">不另外加糖</option>
+          </select>
+        </label>
+        <label>冰量
+          <select id="mtl-detail-ice">
+            <option value="">不填</option>
+            <option value="正常冰">正常冰</option>
+            <option value="少冰">少冰</option>
+            <option value="去冰">去冰</option>
+            <option value="热">热</option>
+          </select>
+        </label>
+      </div>
+      <div class="mtl-row">
+        <label>杯型
+          <select id="mtl-detail-cup">
+            <option value="">不填</option>
+            <option value="中杯">中杯</option>
+            <option value="大杯">大杯</option>
+            <option value="超大杯">超大杯</option>
+          </select>
+        </label>
+        <label>小料
+          <input id="mtl-detail-toppings" autocomplete="off">
+        </label>
+      </div>
+      <div class="mtl-rating">
+        <span class="mtl-rating-label">评分</span>
+        <div id="mtl-detail-rating" class="mtl-stars" role="group" aria-label="评分" data-value="0">
+          <button type="button" data-star="1" aria-label="1 星">★</button>
+          <button type="button" data-star="2" aria-label="2 星">★</button>
+          <button type="button" data-star="3" aria-label="3 星">★</button>
+          <button type="button" data-star="4" aria-label="4 星">★</button>
+          <button type="button" data-star="5" aria-label="5 星">★</button>
+        </div>
+        <button type="button" id="mtl-detail-rating-clear" class="mtl-link">清除</button>
+      </div>
+      <label>备注 / 心情
+        <input id="mtl-detail-note" autocomplete="off">
+      </label>
+      <p id="mtl-detail-meta" class="mtl-hint"></p>
+      <div class="mtl-actions">
+        <button id="mtl-detail-sticker" class="mtl-btn" type="button">生成贴纸</button>
+        <button id="mtl-detail-share" class="mtl-btn" type="button">做张分享卡</button>
+      </div>
+      <div class="mtl-actions">
+        <button id="mtl-detail-save" class="mtl-btn mtl-btn-primary" type="button">保存修改</button>
+        <button id="mtl-detail-delete" class="mtl-btn mtl-btn-danger" type="button">删除</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="mtl-me" class="mtl-modal" hidden>
+    <div class="mtl-modal-backdrop" data-close="1"></div>
+    <div class="mtl-sheet mtl-me-sheet" role="dialog" aria-modal="true" aria-labelledby="mtl-me-title">
+      <div class="mtl-sheet-head">
+        <h3 id="mtl-me-title">我的</h3>
+        <button type="button" class="mtl-icon-btn" data-close="1" aria-label="关闭">×</button>
+      </div>
+
+      <div class="mtl-me-cards">
+        <div class="mtl-me-card"><strong id="mtl-me-total">0</strong><span>总杯数</span></div>
+        <div class="mtl-me-card"><strong id="mtl-me-brands">0</strong><span>品牌</span></div>
+        <div class="mtl-me-card"><strong id="mtl-me-streak">0</strong><span>连续天</span></div>
+      </div>
+
+      <section class="mtl-block">
+        <div class="mtl-section-head">
+          <h4>统计</h4>
+          <div id="mtl-period" class="mtl-period">
+            <button type="button" data-period="week">本周</button>
+            <button type="button" data-period="month" class="is-active">本月</button>
+            <button type="button" data-period="year">今年</button>
+          </div>
+        </div>
+        <div class="mtl-stat-row">
+          <div><strong id="mtl-stat-cups">0</strong><span>杯</span></div>
+          <div><strong id="mtl-stat-spend">—</strong><span>花费</span></div>
+          <div><strong id="mtl-stat-avg">—</strong><span>均价</span></div>
+        </div>
+        <p id="mtl-stat-empty" class="mtl-empty" hidden>这段时间还没有记录。</p>
+        <div class="mtl-top">
+          <div>
+            <h5>最爱品牌</h5>
+            <ol id="mtl-top-brands" class="mtl-top-list"></ol>
+          </div>
+          <div>
+            <h5>最爱饮品</h5>
+            <ol id="mtl-top-drinks" class="mtl-top-list"></ol>
+          </div>
+        </div>
+        <h5 class="mtl-heat-title">近 12 周</h5>
+        <div id="mtl-heatmap" class="mtl-heatmap" aria-label="近 12 周记录热力图"></div>
+        <p class="mtl-hint">颜色越深，那天记的杯数越多。</p>
+      </section>
+
+      <section class="mtl-block">
+        <h4>徽章</h4>
+        <div id="mtl-badges" class="mtl-badges"></div>
+      </section>
+
+      <section class="mtl-block">
+        <h4>主题色</h4>
+        <div id="mtl-themes" class="mtl-themes">
+          <button type="button" data-theme="caramel"><span class="mtl-swatch"></span>焦糖</button>
+          <button type="button" data-theme="matcha"><span class="mtl-swatch"></span>抹茶</button>
+          <button type="button" data-theme="sakura"><span class="mtl-swatch"></span>樱花</button>
+          <button type="button" data-theme="blueberry"><span class="mtl-swatch"></span>蓝莓</button>
+        </div>
+      </section>
+
+      <section class="mtl-block">
+        <h4>关于</h4>
+        <p class="mtl-hint">记录与照片只存在本机浏览器；识别时照片会上传到自有服务端并转发给模型，服务端不保存照片。</p>
+        <p class="mtl-hint">版本 v0.5.4 · 验证版</p>
+      </section>
+    </div>
+  </div>
+
+  <div id="mtl-share" class="mtl-modal" hidden>
+    <div class="mtl-modal-backdrop" data-close="1"></div>
+    <div class="mtl-sheet mtl-share-sheet" role="dialog" aria-modal="true" aria-labelledby="mtl-share-title">
+      <div class="mtl-sheet-head">
+        <h3 id="mtl-share-title">分享卡</h3>
+        <button type="button" class="mtl-icon-btn" data-close="1" aria-label="关闭">×</button>
+      </div>
+      <img id="mtl-share-preview" class="mtl-share-preview" alt="奶茶分享卡预览">
+      <div class="mtl-actions">
+        <button id="mtl-share-save" class="mtl-btn mtl-btn-primary" type="button">保存图片</button>
+        <button id="mtl-share-do" class="mtl-btn" type="button">分享</button>
+      </div>
+      <p class="mtl-hint">卡片只含饮品、规格、杯数、花费和评分，不含备注与位置。</p>
+    </div>
+  </div>
+
+  <div id="mtl-toast" class="mtl-toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/vendor/leaflet/leaflet.js"></script>
+  <script src="assets/js/recognize.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
