@@ -52,6 +52,12 @@
     return month.replace("-", " 年 ") + " 月";
   }
 
+  function formatDay(d) {
+    const now = new Date();
+    const year = d.getFullYear() === now.getFullYear() ? "" : d.getFullYear() + " 年 ";
+    return year + (d.getMonth() + 1) + " 月 " + d.getDate() + " 日";
+  }
+
   function uid() {
     return "mtl_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
   }
@@ -309,6 +315,149 @@
     });
   }
 
+  // 只读文件头，足够覆盖 JPEG 的 EXIF 段；读不到就当没有。
+  const EXIF_HEAD_BYTES = 512 * 1024;
+
+  function readExifTakenAt(text) {
+    const match = /^(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/.exec(String(text || "").trim());
+    if (!match) return null;
+    const value = new Date(
+      Number(match[1]),
+      Number(match[2]) - 1,
+      Number(match[3]),
+      Number(match[4]),
+      Number(match[5]),
+      Number(match[6])
+    );
+    return Number.isFinite(value.getTime()) ? value : null;
+  }
+
+  // 解析 JPEG 里的 EXIF：拍摄地经纬度 + 拍摄时间。
+  // 只在浏览器本地读，照片和元数据都不外传；不支持的格式（如 HEIC）直接返回 null。
+  function parseExifBuffer(buffer) {
+    const data = new Uint8Array(buffer);
+    if (data.length < 4 || data[0] !== 0xff || data[1] !== 0xd8) return null;
+    const view = new DataView(buffer);
+
+    let offset = 2;
+    let tiff = -1;
+    while (offset + 4 <= data.length) {
+      if (data[offset] !== 0xff) break;
+      const marker = data[offset + 1];
+      if (marker === 0xd8 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
+        offset += 2;
+        continue;
+      }
+      if (marker === 0xd9 || marker === 0xda) break;
+      const size = view.getUint16(offset + 2, false);
+      if (size < 2) break;
+      const isExif =
+        marker === 0xe1 &&
+        offset + 10 <= data.length &&
+        data[offset + 4] === 0x45 &&
+        data[offset + 5] === 0x78 &&
+        data[offset + 6] === 0x69 &&
+        data[offset + 7] === 0x66;
+      if (isExif) {
+        tiff = offset + 10;
+        break;
+      }
+      offset += 2 + size;
+    }
+    if (tiff < 0 || tiff + 8 > data.length) return null;
+
+    const little = data[tiff] === 0x49 && data[tiff + 1] === 0x49;
+    const big = data[tiff] === 0x4d && data[tiff + 1] === 0x4d;
+    if (!little && !big) return null;
+    if (view.getUint16(tiff + 2, little) !== 42) return null;
+
+    const u16 = (at) => (at >= 0 && at + 2 <= data.length ? view.getUint16(at, little) : 0);
+    const u32 = (at) => (at >= 0 && at + 4 <= data.length ? view.getUint32(at, little) : 0);
+
+    function readIfd(ifdOffset) {
+      const entries = {};
+      const start = tiff + ifdOffset;
+      const count = u16(start);
+      for (let i = 0; i < count; i += 1) {
+        const entry = start + 2 + i * 12;
+        if (entry + 12 > data.length) break;
+        entries[u16(entry)] = entry;
+      }
+      return entries;
+    }
+
+    function ascii(entry) {
+      const count = u32(entry + 4);
+      const inline = count * 1 <= 4;
+      const at = inline ? entry + 8 : tiff + u32(entry + 8);
+      if (at < 0 || at >= data.length) return "";
+      let text = "";
+      const limit = Math.min(count, 32, data.length - at);
+      for (let i = 0; i < limit; i += 1) {
+        const code = data[at + i];
+        if (code === 0) break;
+        text += String.fromCharCode(code);
+      }
+      return text;
+    }
+
+    function rationals(entry) {
+      const count = u32(entry + 4);
+      const at = tiff + u32(entry + 8);
+      const values = [];
+      for (let i = 0; i < Math.min(count, 3); i += 1) {
+        const base = at + i * 8;
+        const num = u32(base);
+        const den = u32(base + 4);
+        values.push(den ? num / den : 0);
+      }
+      return values;
+    }
+
+    function coordinate(parts, ref) {
+      if (parts.length < 3) return null;
+      const value = parts[0] + parts[1] / 60 + parts[2] / 3600;
+      const mark = String(ref || "").toUpperCase();
+      if (mark === "S" || mark === "W") return -value;
+      return value === 0 ? null : value;
+    }
+
+    const result = { lat: null, lng: null, takenAt: null };
+    try {
+      const ifd0 = readIfd(u32(tiff + 4));
+      if (ifd0[0x8825]) {
+        const gps = readIfd(u32(ifd0[0x8825] + 8));
+        if (gps[2] && gps[1]) result.lat = coordinate(rationals(gps[2]), ascii(gps[1]));
+        if (gps[4] && gps[3]) result.lng = coordinate(rationals(gps[4]), ascii(gps[3]));
+      }
+      if (ifd0[0x8769]) {
+        const exifIfd = readIfd(u32(ifd0[0x8769] + 8));
+        if (exifIfd[0x9003]) result.takenAt = readExifTakenAt(ascii(exifIfd[0x9003]));
+      }
+      if (!result.takenAt && ifd0[0x0132]) {
+        result.takenAt = readExifTakenAt(ascii(ifd0[0x0132]));
+      }
+    } catch (err) {
+      return null;
+    }
+
+    if (!Number.isFinite(result.lat) || !Number.isFinite(result.lng)) {
+      result.lat = null;
+      result.lng = null;
+    }
+    return result;
+  }
+
+  async function readExif(file) {
+    try {
+      const head = file.slice(0, EXIF_HEAD_BYTES);
+      const buffer = await head.arrayBuffer();
+      return parseExifBuffer(buffer);
+    } catch (err) {
+      return null;
+    }
+  }
+
   async function prepareImages(file) {
     const img = await loadImage(file);
     const photo = await resizeToBlob(img, PHOTO_EDGE, 0.82);
@@ -331,29 +480,43 @@
 
   async function runGeo(job) {
     setStep("geo", "active");
-    if (!window.isSecureContext) {
-      if (!pending || job !== jobSeq) return;
-      pending.geoState = "insecure";
-      setStep("geo", "warn");
-      noteWorking("当前不是 HTTPS，iPhone 定位不可用，可手填城市 / 区");
-      return;
-    }
-    if (!navigator.geolocation) {
-      pending.geoState = "error";
-      pending.geoError = "这个浏览器不支持定位";
-      setStep("geo", "warn");
-      noteWorking(pending.geoError);
-      return;
+    const fromExif = pending && pending.geoSource === "exif";
+
+    if (!fromExif) {
+      if (!window.isSecureContext) {
+        if (!pending || job !== jobSeq) return;
+        pending.geoState = "insecure";
+        setStep("geo", "warn");
+        noteWorking("当前不是 HTTPS，定位不可用，可手填城市 / 区");
+        return;
+      }
+      if (!navigator.geolocation) {
+        pending.geoState = "error";
+        pending.geoError = "这个浏览器不支持定位";
+        setStep("geo", "warn");
+        noteWorking(pending.geoError);
+        return;
+      }
+
+      try {
+        const position = await getPosition();
+        if (!pending || job !== jobSeq) return;
+        pending.lat = position.coords.latitude;
+        pending.lng = position.coords.longitude;
+        noteWorking("位置已拿到，正在查城市 / 区…");
+      } catch (err) {
+        if (!pending || job !== jobSeq) return;
+        pending.geoState = "error";
+        pending.geoError = err.message || "没拿到定位，可手填城市 / 区";
+        setStep("geo", "warn");
+        noteWorking(pending.geoError);
+        return;
+      }
+    } else {
+      noteWorking("按照片拍摄地查城市 / 区…");
     }
 
     try {
-      const position = await getPosition();
-      if (!pending || job !== jobSeq) return;
-      pending.lat = position.coords.latitude;
-      pending.lng = position.coords.longitude;
-      pending.geoState = "coords";
-      noteWorking("位置已拿到，正在查城市 / 区…");
-
       const response = await fetch("/api/geocode", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -366,12 +529,14 @@
       if (!pending || job !== jobSeq) return;
       pending.city = data.city || "";
       pending.district = data.district || "";
-      pending.geoState = "done";
+      pending.geoState = fromExif ? "exif" : "done";
       setStep("geo", "done");
     } catch (err) {
       if (!pending || job !== jobSeq) return;
       pending.geoState = "error";
-      pending.geoError = err.message || "没拿到定位，可手填城市 / 区";
+      pending.geoError = fromExif
+        ? "拍摄地查不到城市 / 区，可手填"
+        : err.message || "没拿到定位，可手填城市 / 区";
       setStep("geo", "warn");
       noteWorking(pending.geoError);
     }
@@ -465,10 +630,26 @@
       district: "",
       lat: null,
       lng: null,
+      geoSource: "device",
+      takenAt: null,
       stickerBlob: null,
       stickerUrl: null,
       cutoutState: "pending",
     };
+
+    // 先看照片自带的拍摄地 / 拍摄时间，有就用它，没有才退回当前定位。
+    const exif = await readExif(file);
+    if (!pending || job !== jobSeq) return;
+    if (exif) {
+      if (Number.isFinite(exif.lat) && Number.isFinite(exif.lng)) {
+        pending.lat = exif.lat;
+        pending.lng = exif.lng;
+        pending.geoSource = "exif";
+      }
+      if (exif.takenAt && exif.takenAt.getTime() <= Date.now()) {
+        pending.takenAt = exif.takenAt;
+      }
+    }
 
     $("#mtl-capture-empty").hidden = true;
     $("#mtl-capture-working").hidden = false;
@@ -522,6 +703,36 @@
     });
   }
 
+  function recentPlaces() {
+    const list = [];
+    records.forEach((record) => {
+      const city = String(record.city || "").trim();
+      if (!city) return;
+      const district = String(record.district || "").trim();
+      const key = city + "|" + district;
+      if (list.some((item) => item.key === key)) return;
+      list.push({ key, city, district });
+    });
+    return list.slice(0, 3);
+  }
+
+  function renderPlaceChips() {
+    const places = recentPlaces();
+    const wrap = $("#mtl-place-wrap");
+    const box = $("#mtl-place-chips");
+    box.textContent = "";
+    wrap.hidden = places.length === 0;
+    places.forEach((place) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mtl-chip";
+      btn.textContent = [place.city, place.district].filter(Boolean).join(" · ");
+      btn.dataset.city = place.city;
+      btn.dataset.district = place.district;
+      box.appendChild(btn);
+    });
+  }
+
   function finishPending() {
     if (!pending) return;
     setStep("save", "done");
@@ -534,6 +745,7 @@
     $("#mtl-note").value = "";
     resetOptionalFields();
     renderRecentChips();
+    renderPlaceChips();
 
     const badge = $("#mtl-ai-badge");
     const hints = [];
@@ -558,12 +770,17 @@
       hints.push(pending.aiError || "手动写饮品名也能存");
     }
 
-    if (pending.geoState === "done") {
-      hints.push("定位：" + ([pending.city, pending.district].filter(Boolean).join(" · ") || "已获取"));
+    if (pending.geoState === "exif") {
+      hints.push("按照片拍摄地：" + ([pending.city, pending.district].filter(Boolean).join(" · ") || "已获取"));
+    } else if (pending.geoState === "done") {
+      hints.push("按当前位置：" + ([pending.city, pending.district].filter(Boolean).join(" · ") || "已获取"));
     } else if (pending.geoState === "insecure") {
       hints.push("当前不是 HTTPS，定位不可用");
     } else if (pending.geoState === "error") {
       hints.push(pending.geoError || "没拿到定位，可手填城市 / 区");
+    }
+    if (pending.takenAt) {
+      hints.push("拍摄于 " + formatDay(pending.takenAt));
     }
 
     $("#mtl-ai-hint").textContent = hints.join("；");
@@ -609,11 +826,15 @@
     }
 
     const now = new Date();
+    const takenAt =
+      pending.takenAt instanceof Date && Number.isFinite(pending.takenAt.getTime())
+        ? pending.takenAt
+        : now;
     const aiHadName = Boolean(pending.aiRawName);
     const record = {
       id: uid(),
       createdAt: now.toISOString(),
-      date: dateKey(now),
+      date: dateKey(takenAt),
       drinkName,
       city,
       district,
@@ -1988,6 +2209,13 @@
       if (!chip) return;
       $("#mtl-drink-name").value = chip.dataset.name || "";
       $("#mtl-drink-name").focus();
+    });
+
+    $("#mtl-place-chips").addEventListener("click", (event) => {
+      const chip = event.target.closest(".mtl-chip");
+      if (!chip) return;
+      $("#mtl-city").value = chip.dataset.city || "";
+      $("#mtl-district").value = chip.dataset.district || "";
     });
 
     document.addEventListener("keydown", (event) => {

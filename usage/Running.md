@@ -219,12 +219,12 @@ Caddy 会自动申请并续期证书，前提是 80/443 可访问、DNS 已生�
 
 ### 9.6 上线前检查
 
-- [ ] `https://mtl.yourdomain.com/api/health` 三项 `configured` 均为 true
+- [x] `https://mtl.chesterlee.cn/api/health` 三项 `configured` 均为 true（2026-10-27 线上验证）
 - [ ] iPhone Safari 打开无「不安全」，定位权限能正常弹出
 - [ ] 页脚「隐私政策」可打开，内容与实际能力一致
-- [ ] 页脚备案号已换成真实备案号，并链接 `beian.mit.gov.cn`
-- [ ] `.env` 未进仓库（`.gitignore` 已含 `.env`）
-- [ ] 防火墙未开放 8830，只开 22/80/443
+- [x] 页脚备案号已换成真实备案号 `陇ICP备2026009894号-2`，链接 `beian.miit.gov.cn`（2026-10-27，`web/index.html` + `web/privacy.html`）
+- [x] `.env` 未进仓库（`.gitignore` 已含 `.env`）
+- [x] 防火墙未开放 8830，只开 22/80/443（腾讯云控制台入站规则）
 - [ ] remove.bg 额度已确认（免费 50 次/月）；不够就先关抠图或充值
 - [ ] 临时隧道已关闭，避免多一个公网入口
 - [ ] 真机走一遍：拍照 → 识别 → 定位 → 印章 → 地图

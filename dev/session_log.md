@@ -265,6 +265,28 @@
 - 风险/注意事项：
   - 贴纸替换时容器由 128px 圆形变为 152px 方形，会出现一次轻微布局跳动，属预期。
 
+## 2026-10-27 会话条目：v0.5.5 历史照片按拍摄地 / 拍摄时间自动填
+
+- 目标：
+  - 用户反馈「历史相册照片要自己填地址太麻烦」，要求尽量自动获取。原实现一律用「此刻定位」，对历史照片会把拍摄地错标成当前位置。
+- 已做：
+  - `web/assets/js/app.js`：新增本机 JPEG EXIF 解析（`readExif` / `parseExifBuffer`，只读文件头 512KB，支持大小端、GPS 经纬度、`DateTimeOriginal`），照片与元数据不外传；`pending` 增加 `geoSource` / `takenAt`；三级回退：EXIF 拍摄地 → 浏览器定位 → 手填。
+  - `runGeo` 区分来源：有 EXIF 时跳过定位权限，直接 `/api/geocode` 反查；状态新增 `geoState="exif"`。
+  - 记录 `date` 改用 EXIF 拍摄时间（缺失才用保存当天）；确认卡提示区分「按照片拍摄地 / 按当前位置」并显示「拍摄于 …」。
+  - `web/index.html` + CSS：新增「最近去过」城市 / 区 chips（取自历史记录，一键填充）；补 `.mtl-recent[hidden]` 修正 `hidden` 被 `display:grid` 覆盖的问题。
+  - 版本升到 `v0.5.5`，同步 `README.md`、`plan/RPD_需求文档.md`（v0.10.0）、`.trae/rules/project_rules.md`。
+- 关键结论/决定：
+  - 定位口径改为「拍摄地优先」：照片自带 GPS 比「此刻在哪」更符合存档语义；无 GPS 时仍退回当前定位，并明确标注来源。
+  - 不引入 EXIF 三方库，自己解析 JPEG（项目零依赖 / 零构建）；HEIC 直接跳过走定位兜底。
+- 产出物（文件/链接）：
+  - `web/assets/js/app.js`、`web/index.html`、`web/assets/css/style.css`、`package.json`、`README.md`、`plan/RPD_需求文档.md`、`.trae/rules/project_rules.md`
+- 待办：
+  - 真机验证 iOS 相册传图是否保留 GPS（用一张相机原图测试，确认提示是「按照片拍摄地」）。
+  - 确认 EXIF 拍摄时间落到正确月份，历史照片不会挤进当月印章。
+- 风险/注意事项：
+  - 微信 / 飞书转过、截图、网页保存的图通常无 GPS（实测 `inbox/` 内 26 张均只有拍摄时间、无坐标），这类只能靠「最近去过」或手填。
+  - 图片若是 HEIC 或 EXIF 超出文件头 512KB，解析返回 null，自动退回当前定位。
+
 
 
 

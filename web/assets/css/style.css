@@ -920,6 +920,10 @@ body {
   gap: 6px;
 }
 
+.mtl-recent[hidden] {
+  display: none;
+}
+
 .mtl-recent-label {
   color: var(--mtl-muted);
   font-size: 12px;
