@@ -8,9 +8,11 @@
 - 一台 Mac（需 Node 18+；本项目用 Node 24 验证通过）
 - Google Chrome（Mac 上看效果）
 - iPhone（和 Mac 连同一个 Wi-Fi）
-- 两个 Key（只在服务端 `.env` 里，绝不进前端）：
+- 四个 Key（识别 / 定位 / 抠图只在服务端 `.env` 里，绝不进前端；地图的 JS API Key 例外，见下）：
   - `DASHSCOPE_API_KEY`：豆包（火山方舟）API Key；也兼容替换成通义千问 VL（阿里云百炼）
-  - `AMAP_KEY`：高德 Web 服务 Key
+  - `AMAP_KEY`：高德 Web 服务 Key（逆地理编码，只在服务端用）
+  - `AMAP_JS_KEY` + `AMAP_JS_SECURITY`：高德 **Web 端（JS API）** Key 与安全密钥（渲染地图）。高德机制要求它下发到前端才能加载，靠控制台的**域名白名单**限制来源；不填则地图区显示「地图暂不可用」
+- 可选：`STT_API_KEY` / `STT_BASE_URL` / `STT_MODEL`（语音转文字）。三个都填才会出现「转成文字」；不填则自动降级为手机浏览器自带识别（安卓 Chrome），再不行就只保留语音，不影响录音与保存
 
 ## 2. 第一次安装
 
@@ -20,12 +22,21 @@ npm install
 cp .env.example .env
 ```
 
-然后编辑 `.env`，填两行：
+然后编辑 `.env`，填这几行：
 
 ```bash
 DASHSCOPE_API_KEY=你的方舟Key
-AMAP_KEY=你的高德Key
+AMAP_KEY=你的高德Web服务Key
+AMAP_JS_KEY=你的高德JS API Key
+AMAP_JS_SECURITY=你的安全密钥
 ```
+
+> 高德 JS API Key 的创建方式：`console.amap.com/dev/key/app` → 新建 Key → 服务平台选「Web端(JS API)」，
+> 域名白名单填上线域名（如 `mtl.chesterlee.cn`）；安全密钥在同页「安全密钥」一栏。
+> **实测高德不接受 `localhost` 作为白名单条目**（会提示「有不符合规范的域名」），所以本地调试地图要看真实域名：
+> 用 `localhost` 打开时地图区会显示「地图暂不可用」，属正常现象；想在本地看，可临时加
+> `--host-resolver-rules="MAP mtl.chesterlee.cn 127.0.0.1"` 用域名访问本地服务。
+> 不填也能跑，只是地图区显示「地图暂不可用」，其余功能不受影响。
 
 > 只想先看界面、不花识别费用：把 `MOCK_AI=1`，识别会返回固定的「伯牙绝弦」。
 
@@ -36,12 +47,13 @@ cd /Users/Admin/Knowledge/Coding/milk-tea-log
 npm start
 ```
 
-看到下面三行就成功了：
+看到下面几行就成功了：
 
 ```
 [mtl] 服务已启动：http://localhost:8830
 [mtl] AI：已配置
 [mtl] 逆地理编码：已配置
+[mtl] 地图（JS API）：已配置
 ```
 
 Mac 上打开：http://localhost:8830
@@ -100,9 +112,13 @@ https://xxxx-xxxx.trycloudflare.com
 | 识别提示「还没配置」 | `.env` 里 `DASHSCOPE_API_KEY` 为空，或改完没重启服务 |
 | 定位拿不到 | 确认是 `https://` 打开；Safari 设置里允许「位置」；也可手填城市/区 |
 | 城市/区是空的 | `AMAP_KEY` 没配或高德 Key 不是「Web 服务」类型 |
-| 地图空白 | 检查 `web/assets/vendor/leaflet/` 是否存在；瓦片用高德，需能联网 |
+| 地图空白 / 提示「地图暂不可用」 | `.env` 里 `AMAP_JS_KEY` / `AMAP_JS_SECURITY` 没配，或改完没重启服务；Key 必须是「Web端(JS API)」类型，且域名白名单含当前访问域名（高德不接受 `localhost`）；控制台报 `INVALID_USER_SCODE` 说明安全密钥不对 |
+| 地图脚本只返回 `INVALID_USER_DOMAIN` | 浏览器请求没带 `Referer`，被高德域名白名单拦了；确认静态托管没有发 `Referrer-Policy: no-referrer`（本项目已改为 `strict-origin-when-cross-origin`），且访问域名在 Key 白名单里 |
 | 手机打不开隧道 | 确认 Mac 上 `npm start` 和 `cloudflared` 两个终端都在跑 |
+| 没有「转成文字」按钮 | `STT_MODEL` 没配（`/api/health` 里 `sttConfigured: false`）；语音照录照存，不受影响 |
+| 点「转成文字」报错 | 看 `logs/server-*.jsonl` 里 `transcribe.failed` / `transcribe.upstream` 的 reason；401/403 多半是 Key 不对，429 是额度或频率超限 |
 | 页面样式不对 | 强制刷新：`Cmd + Shift + R` |
+| 「我的」页看不到账户入口 | 本机（`localhost` / `127.0.0.1`）故意不挂；线上需先在账户中心登记作品 `milk-tea-log`（站点地址 `https://mtl.chesterlee.cn`、`light` + `#b9794f`）并放行 CORS，详见 account-center 项目 `plan/接入契约.md` |
 
 ## 8. 改哪里
 
@@ -112,6 +128,7 @@ https://xxxx-xxxx.trycloudflare.com
 | 颜色/布局 | `web/assets/css/style.css` |
 | 记录逻辑/归档/地图 | `web/assets/js/app.js` |
 | 前端识别调用 | `web/assets/js/recognize.js` |
+| 统一账户入口 | `web/assets/js/account.js`；SDK 本体 `web/assets/js/ps-auth.js`（从账户中心整文件复制，不手改） |
 | AI 与定位接口 | `server/index.js` |
 | 需求范围 | `plan/RPD_需求文档.md` |
 | 项目规则 | `.trae/rules/project_rules.md`（先改母本再同步） |
@@ -137,6 +154,7 @@ node server/index.js
    ├── web/ 静态页（含 privacy.html）
    ├── /api/recognize → 豆包 / 通义 VL
    ├── /api/cutout    → remove.bg（失败降级原图）
+   ├── /api/transcribe → 语音转文字（不配则前端降级浏览器识别）
    └── /api/geocode   → 高德逆地理
 ```
 
@@ -172,7 +190,12 @@ DASHSCOPE_API_KEY=...
 DASHSCOPE_MODEL=...
 DASHSCOPE_BASE_URL=...
 AMAP_KEY=...
+AMAP_JS_KEY=...
+AMAP_JS_SECURITY=...
 REMOVEBG_API_KEY=...   # 不填则自动降级为原图贴纸
+STT_API_KEY=...        # 语音转文字（OpenAI 兼容 /audio/transcriptions）
+STT_BASE_URL=...       # 不填 STT_API_KEY / STT_BASE_URL 时默认复用 DASHSCOPE_*
+STT_MODEL=qwen3-asr-flash   # 必须显式填；不填则「转成文字」降级为浏览器识别
 ```
 
 用 pm2 常驻并开机自启：
@@ -188,7 +211,8 @@ sudo env PATH=$PATH pm2 startup systemd -u $USER --hp $HOME
 
 ```bash
 curl http://127.0.0.1:8830/api/health
-# 期望：{"ok":true,"aiConfigured":true,"geocodeConfigured":true,"cutoutConfigured":true,"mockAi":false}
+# 期望：{"ok":true,"aiConfigured":true,"geocodeConfigured":true,"cutoutConfigured":true,"sttConfigured":true,"mockAi":false}
+# sttConfigured 为 false 也能正常用：语音照录照存，只是不显示「转成文字」
 ```
 
 ### 9.4 Caddy 配 HTTPS
@@ -217,9 +241,32 @@ Caddy 会自动申请并续期证书，前提是 80/443 可访问、DNS 已生�
 - 收集方式：让测试者点「印章 → 导出备份」，把 JSON 发给你。
 - 想自动汇总，需要新增一个「上传记录」接口并同步隐私政策——**本版未做**，属于下一版范围。
 
+#### 9.5.1 真机测试诊断日志（v0.5.6）
+
+手机点一次「拍一杯」，前端会把每一步结果上报 `/api/log`，服务端按天写成两个文件：
+
+| 文件 | 内容 |
+|---|---|
+| `logs/client-YYYY-MM-DD.jsonl` | 选图大小、EXIF 是否有拍摄地 / 时间、压缩后体积、识别出的饮品名与置信度、城市 / 区、抠图结果、保存结果、页面报错 |
+| `logs/server-YYYY-MM-DD.jsonl` | 服务端看到的识别 / 定位 / 抠图结果与耗时、上游报错 |
+
+怎么读：
+
+```bash
+# 本机跑（npm start）
+tail -n 50 logs/client-$(date +%F).jsonl
+
+# 线上跑（腾讯云 systemd）
+ssh -i ~/.ssh/chesterlee_web ubuntu@43.136.92.125 \
+  'tail -n 50 /srv/chesterlee/mtl/logs/client-'"$(date +%F)"'.jsonl'
+```
+
+- 判断口径：一次正常记录应依次出现 `photo.picked → exif.parsed → photo.compressed → ai.ok / geo.ok → confirm.shown → record.saved`；缺哪一步就看对应的 `*.failed` / `*.skipped`。
+- 日志只记流程和结果，**不含图片内容、不含任何 Key**；`logs/` 已加入 `.gitignore`，不会进仓库。
+
 ### 9.6 上线前检查
 
-- [x] `https://mtl.chesterlee.cn/api/health` 三项 `configured` 均为 true（2026-10-27 线上验证）
+- [x] `https://mtl.chesterlee.cn/api/health` 三项 `configured` 均为 true（2026-10-27 线上验证）；`sttConfigured` 为可选项，false 不影响录音
 - [ ] iPhone Safari 打开无「不安全」，定位权限能正常弹出
 - [ ] 页脚「隐私政策」可打开，内容与实际能力一致
 - [x] 页脚备案号已换成真实备案号 `陇ICP备2026009894号-2`，链接 `beian.miit.gov.cn`（2026-10-27，`web/index.html` + `web/privacy.html`）
@@ -235,12 +282,9 @@ Caddy 会自动申请并续期证书，前提是 80/443 可访问、DNS 已生�
 |---|---|---|---|
 | **腾讯云轻量整站（本次）** | 几十元/月（新用户常有百元内/年促销） | 好 | 多人多天测试 |
 | 临时隧道（第 4 节） | 0 | 差（地址会变、Mac 要开机） | 自己真机调试 |
-| 帽子云前端 + 云主机 API（9.8） | 服务器 + 多一层配置 | 好 | 后期想上 CDN |
-| 只上传帽子云 | 0 | — | 只能看界面，AI/定位不可用 |
 
-### 9.8 备选：帽子云前端 + 云主机 API
+### 9.8 备选：静态页走 CDN + 云主机 API
 
 - 适用：以后静态页想走 CDN、访问量变大时。
-- 做法：仓库推 GitHub / Gitee → 帽子云绑定仓库，输出目录填 `web`；
-  反向代理规则 `/api*` → `https://mtl.yourdomain.com`（保留原始路径）。
+- 做法：静态页放腾讯云 COS（同账号内网免流量）或其它境内 CDN，反向代理规则 `/api*` → `https://mtl.chesterlee.cn`（保留原始路径）。
 - 代价：多一个故障点和一套配置；测试期不必。

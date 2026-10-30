@@ -21,6 +21,9 @@ node_modules/
 备忘录.md
 inbox/
 
+# 诊断日志（含测试数据，不入库）
+logs/
+
 # IDE
 .vscode/
 .idea/

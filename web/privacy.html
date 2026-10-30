@@ -13,7 +13,7 @@
         <div>
           <p class="mtl-eyebrow">milk-tea-log</p>
           <h1>隐私政策</h1>
-          <p class="mtl-sub">最后更新：2026-10-22</p>
+          <p class="mtl-sub">最后更新：2026-10-29</p>
         </div>
         <a class="mtl-badge" href="index.html">返回</a>
       </header>
@@ -22,8 +22,10 @@
         <section class="mtl-card">
           <h2>一句话说明</h2>
           <p>
-            「拍一杯」不设账号、不做社区。你的奶茶记录只存在你自己的手机浏览器里；
+            「拍一杯」不设自有账号、不做社区。你的奶茶记录只存在你自己的手机浏览器里；
             照片只在识别 / 抠图时经本项目的服务端转发给第三方 AI，服务端不保存照片。
+            你可以选择用「统一账户中心」登录（一处登录，我的其他小作品通用），
+            它只用来确认「你是谁」，不会收到你的奶茶记录。
           </p>
         </section>
 
@@ -33,6 +35,7 @@
           <ul>
             <li>照片、缩略图、抠图后的贴纸图</li>
             <li>饮品名、品牌、备注</li>
+            <li>语音备注（选填，一段不超过 60 秒的录音，存在你本机）</li>
             <li>城市 / 区（选填，来自定位或手填）</li>
             <li>价格、糖度、冰量、杯型、小料、评分（全选填）</li>
             <li>记录时间</li>
@@ -47,6 +50,7 @@
             <li>月份、主题等设置存在浏览器的 localStorage。</li>
             <li>清除浏览器数据、换浏览器或换手机，记录会丢失；建议定期用「导出备份」保存。</li>
             <li>你可以在应用内编辑、删除单条记录，或一键清空全部记录。</li>
+            <li>如果你选择登录统一账户，登录票（Token）也只存在你本机的浏览器里；账户资料（邮箱 / 昵称等）存在账户中心 <code>account.chesterlee.cn</code>，不在本站。</li>
           </ul>
         </section>
 
@@ -57,7 +61,9 @@
             <li><strong>AI 识别</strong>：照片经本机服务端转发给豆包视觉模型（火山方舟）或通义千问 VL（阿里云百炼），用于识别饮品名。</li>
             <li><strong>抠图</strong>：当你使用贴纸抠图时，照片经服务端转发给 remove.bg；失败或未配置时自动降级为原图贴纸。</li>
             <li><strong>定位</strong>：仅发送经纬度给高德地图做逆地理编码，换取城市 / 区；不发送照片。</li>
-            <li>服务端只在内存中转发图片，<strong>不落盘、不在日志中记录图片内容</strong>；日志只保留字节数、耗时、成功与否。</li>
+            <li><strong>语音转文字</strong>：只有你主动点「转成文字」时，那段语音才会经服务端转发给第三方语音转写服务，返回文字后立即丢弃音频；不点转文字，语音就只留在这台手机上。用手机浏览器自带识别（安卓 Chrome）时，语音由浏览器 / 系统处理，不经过我们的服务端。</li>
+            <li>服务端只在内存中转发图片，<strong>不落盘、不在日志中记录图片内容</strong>；诊断日志只保留识别出的饮品名、城市 / 区、字节数、耗时与错误信息，用于验证版排查问题。</li>
+            <li><strong>统一账户登录</strong>：只有你主动点「登录」时，才会跳到账户中心登录，登录成功后只交换一次性票据与身份信息（用户 ID、昵称）；你的奶茶记录、照片、语音不会发给账户中心。</li>
             <li>第三方服务对数据的处理受其各自隐私政策约束；如不希望照片外发，可不使用识别 / 抠图，手动填写也能保存。</li>
           </ul>
         </section>
@@ -73,7 +79,7 @@
         <section class="mtl-card">
           <h2>5. 我们不做什么</h2>
           <ul>
-            <li>不做账号体系、不做社交、不做好友排行。</li>
+            <li>不做自有账号体系、不做社交、不做好友排行（统一账户由 <code>account.chesterlee.cn</code> 独立提供，本站只在登录时使用它的身份）。</li>
             <li>不投放广告，不出售或交换你的记录。</li>
             <li>不使用品牌 logo 暗示与任何奶茶品牌合作。</li>
           </ul>
@@ -93,9 +99,9 @@
       </main>
 
       <footer class="mtl-footer">
-        <span>v0.5.5 · 验证版</span>
+        <span>v0.21.6 · 验证版</span>
         <a href="index.html">拍一杯</a>
-        <span>© 2026 Chester · <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">陇ICP备2026009894号-2</a></span>
+        <span>© 2026 <a href="https://chesterlee.cn/" target="_blank" rel="noopener">Chester</a> · <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">陇ICP备2026009894号-2</a></span>
       </footer>
     </div>
   </body>

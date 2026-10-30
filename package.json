@@ -1,6 +1,6 @@
 {
   "name": "milk-tea-log",
-  "version": "0.5.5",
+  "version": "0.21.6",
   "private": true,
   "description": "拍一杯 — AI 奶茶印章地图（H5 验证版）",
   "scripts": {

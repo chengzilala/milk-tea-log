@@ -3,38 +3,58 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f7efe6">
+  <meta name="theme-color" content="#f6f4ee">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="拍一杯">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/img/icon-180.png">
   <title>拍一杯 — 奶茶印章地图</title>
-  <link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
   <div class="mtl-app">
     <header class="mtl-header">
       <div>
-        <p class="mtl-eyebrow">milk-tea-log · H5 验证版</p>
         <h1>拍一杯</h1>
         <p class="mtl-sub">拍一下，收进你的奶茶印章地图</p>
       </div>
       <div class="mtl-header-actions">
         <div class="mtl-badge" id="mtl-total-badge">0 杯</div>
-        <button id="mtl-me-open" class="mtl-me-btn" type="button">我的</button>
       </div>
     </header>
 
     <main>
       <section id="view-capture" class="mtl-view is-active">
-        <div id="mtl-capture-empty" class="mtl-card mtl-capture-hero">
-          <div class="mtl-hero-stamp" aria-hidden="true">拍</div>
-          <h2>今天喝哪杯？</h2>
-          <p class="mtl-hero-copy">拍一张杯贴、杯身或小票，自动认下饮品名。</p>
-          <div class="mtl-capture-actions">
-            <label class="mtl-btn mtl-btn-primary" for="mtl-camera-input">拍一杯</label>
-            <label class="mtl-btn" for="mtl-gallery-input">从相册选</label>
+        <div id="mtl-capture-empty" class="mtl-capture-hero">
+          <div class="mtl-hero-greet">
+            <p class="mtl-hero-date" id="mtl-hero-date"></p>
+            <h2 id="mtl-hero-hello">今天喝哪杯？</h2>
+            <p class="mtl-hero-state" id="mtl-hero-state">今天还没有记录</p>
+          </div>
+          <div class="mtl-shutter-wrap">
+            <button type="button" id="mtl-shutter" class="mtl-shutter" aria-label="拍照记录这一杯">
+              <svg class="mtl-shutter-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 8.6h3.1l1.3-2.1h7.2l1.3 2.1H20v10.3H4z" />
+                <circle cx="12" cy="13.6" r="3.5" />
+              </svg>
+            </button>
+          </div>
+          <div class="mtl-hero-foot">
+            <button type="button" id="mtl-hero-last" class="mtl-hero-last" hidden>
+              <img id="mtl-hero-last-photo" alt="">
+              <span class="mtl-hero-last-info">
+                <strong id="mtl-hero-last-name" class="mtl-hero-last-name"></strong>
+                <span id="mtl-hero-last-meta" class="mtl-hero-last-meta"></span>
+              </span>
+              <span class="mtl-hero-last-arrow" aria-hidden="true">›</span>
+            </button>
+            <p id="mtl-hero-week" class="mtl-hero-week" hidden></p>
           </div>
           <input id="mtl-camera-input" type="file" accept="image/*" capture="environment" hidden>
           <input id="mtl-gallery-input" type="file" accept="image/*" hidden>
-          <p class="mtl-hint">照片只用于本次识别，服务端不保存；识别失败也可以手动写。</p>
         </div>
 
         <div id="mtl-capture-working" class="mtl-card" hidden>
@@ -59,16 +79,29 @@
             <span id="mtl-ai-badge" class="mtl-pill">AI 猜的</span>
             <span id="mtl-ai-hint" class="mtl-muted"></span>
           </div>
-          <label>饮品名
-            <input name="drinkName" id="mtl-drink-name" placeholder="如：伯牙绝弦" autocomplete="off">
-          </label>
+          <div class="mtl-field-head">
+            <span class="mtl-price-label">饮品名</span>
+            <button type="button" id="mtl-drink-search" class="mtl-link">搜饮品名</button>
+          </div>
+          <input name="drinkName" id="mtl-drink-name" placeholder="如：伯牙绝弦" autocomplete="off">
           <div id="mtl-recent-wrap" class="mtl-recent" hidden>
-            <span class="mtl-recent-label">最近常喝</span>
+            <span id="mtl-recent-label" class="mtl-recent-label">猜你想喝</span>
             <div id="mtl-recent-chips" class="mtl-chips"></div>
+          </div>
+          <div class="mtl-brand-block">
+            <div class="mtl-brand-head">
+              <span class="mtl-price-label">品牌（选填）</span>
+              <button type="button" id="mtl-brand-manual-toggle" class="mtl-link">手填</button>
+            </div>
+            <div id="mtl-brand-chips" class="mtl-chips mtl-brand-chips" role="group" aria-label="品牌"></div>
+            <input id="mtl-brand" placeholder="输入品牌，如：霸王茶姬" autocomplete="off" hidden>
           </div>
           <div class="mtl-row">
             <label>城市
-              <input name="city" id="mtl-city" placeholder="自动定位 / 可手填" autocomplete="off">
+              <span class="mtl-pick-field">
+                <input name="city" id="mtl-city" placeholder="点我选城市" readonly autocomplete="off">
+                <span class="mtl-pick-caret" aria-hidden="true">›</span>
+              </span>
             </label>
             <label>区
               <input name="district" id="mtl-district" placeholder="自动定位 / 可手填" autocomplete="off">
@@ -78,20 +111,57 @@
             <span class="mtl-recent-label">最近去过</span>
             <div id="mtl-place-chips" class="mtl-chips"></div>
           </div>
-          <label>备注 / 心情
-            <input name="note" id="mtl-note" placeholder="选填" autocomplete="off">
+          <label>日期
+            <input id="mtl-date" type="date">
           </label>
+          <div class="mtl-time-block">
+            <div class="mtl-time-head">
+              <span class="mtl-time-label">时间段（选填）</span>
+              <span class="mtl-time-tip">再点一下取消</span>
+            </div>
+            <div id="mtl-time" class="mtl-chips" role="radiogroup" aria-label="时间段" data-value=""></div>
+          </div>
+          <div class="mtl-mood-block">
+            <div class="mtl-mood-head">
+              <span class="mtl-mood-title">这一杯，心情怎么样？</span>
+              <span class="mtl-mood-tip">点一下就好</span>
+            </div>
+            <div id="mtl-mood" class="mtl-mood-picker" role="radiogroup" aria-label="这一杯的心情" data-value=""></div>
+          </div>
+          <div class="mtl-note-block">
+            <div class="mtl-note-head">
+              <span class="mtl-price-label">备注（选填）</span>
+              <button type="button" id="mtl-voice-toggle" class="mtl-link">语音说一句</button>
+            </div>
+            <input name="note" id="mtl-note" placeholder="想写就写，也可以说一句" autocomplete="off">
+            <div id="mtl-voice-panel" class="mtl-voice-panel" hidden>
+              <div class="mtl-voice-head">
+                <button id="mtl-voice-record" type="button" class="mtl-voice-rec">点一下开始说</button>
+                <span id="mtl-voice-timer" class="mtl-voice-timer" hidden>00:00</span>
+                <button id="mtl-voice-stop" type="button" class="mtl-btn mtl-voice-stop" hidden>说完，停</button>
+              </div>
+              <div id="mtl-voice-preview" class="mtl-voice-preview" hidden>
+                <audio id="mtl-voice-audio" controls preload="metadata"></audio>
+                <div class="mtl-voice-actions">
+                  <button id="mtl-voice-transcribe" type="button" class="mtl-link" hidden>转成文字</button>
+                  <button id="mtl-voice-redo" type="button" class="mtl-link">重录</button>
+                  <button id="mtl-voice-drop" type="button" class="mtl-link">删掉语音</button>
+                </div>
+              </div>
+              <p id="mtl-voice-status" class="mtl-hint"></p>
+            </div>
+          </div>
+          <div class="mtl-price-block">
+            <div class="mtl-price-head">
+              <span class="mtl-price-label">价格（选填）</span>
+              <button type="button" id="mtl-price-manual-toggle" class="mtl-link">手填</button>
+            </div>
+            <div id="mtl-price-chips" class="mtl-chips" role="group" aria-label="价格"></div>
+            <input id="mtl-price" type="number" min="0" step="0.1" inputmode="decimal" placeholder="实际付了多少" hidden>
+          </div>
           <details class="mtl-more">
             <summary>更多信息（选填）</summary>
             <div class="mtl-more-body">
-              <div class="mtl-row">
-                <label>品牌
-                  <input id="mtl-brand" placeholder="如：霸王茶姬" autocomplete="off">
-                </label>
-                <label>价格（元）
-                  <input id="mtl-price" type="number" min="0" step="0.1" inputmode="decimal" placeholder="如：18">
-                </label>
-              </div>
               <div class="mtl-row">
                 <label>糖度
                   <select id="mtl-sugar">
@@ -165,38 +235,224 @@
           <div id="mtl-list" class="mtl-list" hidden></div>
           <p id="mtl-empty" class="mtl-empty">这个月还没有印章，拍一杯试试。</p>
         </div>
-        <div class="mtl-card mtl-actions mtl-actions-three">
-          <button id="mtl-export" class="mtl-btn" type="button">导出备份</button>
-          <button id="mtl-import" class="mtl-btn" type="button">导入备份</button>
-          <button id="mtl-clear" class="mtl-btn mtl-btn-danger" type="button">清空记录</button>
-          <input id="mtl-import-input" type="file" accept="application/json,.json" hidden>
-        </div>
       </section>
 
       <section id="view-map" class="mtl-view">
         <div class="mtl-card mtl-map-card">
-          <div class="mtl-section-head">
-            <h2>奶茶印章地图</h2>
-            <span id="mtl-map-count" class="mtl-muted"></span>
+          <div class="mtl-map-stage">
+            <div id="mtl-map" class="mtl-map"></div>
+            <div class="mtl-map-topbar">
+              <span id="mtl-map-stats" class="mtl-map-stats"></span>
+            </div>
+            <div id="mtl-map-sheet" class="mtl-map-sheet" hidden>
+              <button type="button" id="mtl-map-sheet-close" class="mtl-map-sheet-close" aria-label="收起">×</button>
+              <div id="mtl-map-sheet-body" class="mtl-map-sheet-body"></div>
+            </div>
+            <p id="mtl-map-empty" class="mtl-empty mtl-map-empty">还没有带位置的印章。</p>
           </div>
-          <div id="mtl-map" class="mtl-map"></div>
           <p class="mtl-hint">地图只显示你自己的奶茶印章，不做探店推荐。</p>
-          <p id="mtl-map-empty" class="mtl-empty">还没有带位置的印章。</p>
         </div>
+      </section>
+
+      <section id="view-me" class="mtl-view mtl-me-page">
+        <div class="mtl-section-head">
+          <h2>我的</h2>
+        </div>
+
+        <a class="mtl-account" id="mtl-account" href="#" hidden>
+          <span class="mtl-account-badge" id="mtl-account-badge" aria-hidden="true">我</span>
+          <span class="mtl-account-main">
+            <strong id="mtl-account-name">登录统一账户</strong>
+            <span id="mtl-account-hint">一处登录，各作品通用</span>
+          </span>
+          <span class="mtl-account-arrow" aria-hidden="true">›</span>
+        </a>
+
+        <div class="mtl-me-cards">
+          <div class="mtl-me-card"><strong id="mtl-me-total">0</strong><span>总杯数</span></div>
+          <div class="mtl-me-card"><strong id="mtl-me-brands">0</strong><span>品牌</span></div>
+          <div class="mtl-me-card"><strong id="mtl-me-streak">0</strong><span>连续天</span></div>
+        </div>
+
+        <section class="mtl-block">
+          <div class="mtl-section-head">
+            <h4>品牌墙</h4>
+            <span id="mtl-brand-wall-summary" class="mtl-muted">0 / 30</span>
+          </div>
+          <div id="mtl-brand-wall" class="mtl-brand-wall is-collapsed"></div>
+          <button type="button" id="mtl-brand-wall-toggle" class="mtl-brand-wall-toggle" hidden>展开全部</button>
+          <p class="mtl-hint">灰度的是还没喝过的品牌；这里只做记录，不用刻意收集。</p>
+        </section>
+
+        <section class="mtl-block">
+          <div class="mtl-section-head">
+            <h4>统计</h4>
+            <div id="mtl-period" class="mtl-period">
+              <button type="button" data-period="week">本周</button>
+              <button type="button" data-period="month" class="is-active">本月</button>
+              <button type="button" data-period="year">今年</button>
+            </div>
+          </div>
+          <div class="mtl-stat-row">
+            <div><strong id="mtl-stat-cups">0</strong><span>杯</span></div>
+            <div><strong id="mtl-stat-spend">—</strong><span>花费</span></div>
+            <div><strong id="mtl-stat-avg">—</strong><span>均价</span></div>
+          </div>
+          <p id="mtl-stat-note" class="mtl-stat-note" hidden></p>
+          <p id="mtl-stat-empty" class="mtl-empty" hidden>这段时间还没有记录。</p>
+          <div class="mtl-top">
+            <div>
+              <h5>最爱品牌</h5>
+              <ol id="mtl-top-brands" class="mtl-top-list"></ol>
+            </div>
+            <div>
+              <h5>最爱饮品</h5>
+              <ol id="mtl-top-drinks" class="mtl-top-list"></ol>
+            </div>
+          </div>
+          <h5 class="mtl-heat-title">近 12 周</h5>
+          <div id="mtl-heatmap" class="mtl-heatmap" aria-label="近 12 周记录热力图"></div>
+          <p class="mtl-hint">颜色越深，那天记的杯数越多。</p>
+        </section>
+
+        <section class="mtl-block">
+          <div class="mtl-section-head">
+            <h4>口味档案</h4>
+            <span class="mtl-muted">只从你的记录里算</span>
+          </div>
+          <div id="mtl-taste-grid" class="mtl-taste-grid"></div>
+          <p id="mtl-taste-empty" class="mtl-empty" hidden>多记几杯，这里会慢慢长出你的口味。</p>
+          <p id="mtl-taste-tip" class="mtl-hint" hidden></p>
+        </section>
+
+        <section class="mtl-block">
+          <h4>主题风格</h4>
+          <div id="mtl-themes" class="mtl-themes">
+            <button type="button" data-theme="paper"><span class="mtl-swatch"></span>纸感贴纸</button>
+            <button type="button" data-theme="stage"><span class="mtl-swatch"></span>暖棕展台</button>
+            <button type="button" data-theme="pop"><span class="mtl-swatch"></span>彩色卡片</button>
+            <button type="button" data-theme="quiet"><span class="mtl-swatch"></span>极简留白</button>
+          </div>
+        </section>
+
+        <details class="mtl-block mtl-fold">
+          <summary class="mtl-fold-head">
+            <h4>数据与备份</h4>
+            <span class="mtl-fold-icon" aria-hidden="true"></span>
+          </summary>
+          <div class="mtl-fold-body">
+            <p id="mtl-backup-state" class="mtl-hint">还没备份过</p>
+            <p class="mtl-hint">记录和照片只存在这台设备的浏览器里，不会上传到服务器。换手机、换浏览器、清除浏览器数据或系统自动清理后，就看不到了，需要自己导出备份再导入。装到桌面并经常打开，能少被系统当成「不用的网站」清理。</p>
+            <div class="mtl-actions mtl-actions-three">
+              <button id="mtl-export" class="mtl-btn" type="button">导出备份</button>
+              <button id="mtl-import" class="mtl-btn" type="button">导入备份</button>
+              <button id="mtl-clear" class="mtl-btn mtl-btn-danger" type="button">清空记录</button>
+            </div>
+            <input id="mtl-import-input" type="file" accept=".json,.zip,application/json,application/zip" hidden>
+          </div>
+        </details>
+
+        <details class="mtl-block mtl-fold">
+          <summary class="mtl-fold-head">
+            <h4>添加到手机桌面</h4>
+            <span class="mtl-fold-icon" aria-hidden="true"></span>
+          </summary>
+          <div class="mtl-fold-body">
+            <p class="mtl-hint">装到桌面后，点图标就能直接打开，像一个小 App，不用每次翻浏览器。</p>
+            <div class="mtl-install-steps">
+              <div class="mtl-install-item">
+                <strong>iPhone / iPad</strong>
+                <p>用 Safari 打开本页 → 点底部「分享」→ 选「添加到主屏幕」→ 右上角「添加」。</p>
+              </div>
+              <div class="mtl-install-item">
+                <strong>安卓手机</strong>
+                <p>用 Chrome / Edge 打开本页 → 点右上角「⋮」→ 选「添加到主屏幕」或「安装应用」→ 确认。</p>
+              </div>
+            </div>
+            <p class="mtl-hint">在微信里打开时没有这个入口：先点右上角「···」→「在浏览器打开」，再按上面的步骤操作。</p>
+          </div>
+        </details>
+
+        <details class="mtl-block mtl-fold">
+          <summary class="mtl-fold-head">
+            <h4>关于</h4>
+            <span class="mtl-fold-icon" aria-hidden="true"></span>
+          </summary>
+          <div class="mtl-fold-body">
+            <p class="mtl-hint">记录与照片只存在本机浏览器；识别时照片会上传到自有服务端并转发给模型，服务端不保存照片。</p>
+            <a class="mtl-site-link" href="https://mtl.chesterlee.cn/site/" target="_blank" rel="noopener">
+              <span>拍一杯官网 · 介绍与真机截图</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+            <p class="mtl-hint">官网是给还没用过的人看的：三步怎么用、能做什么、在手机里长什么样，都在那一页；想推荐给朋友，把链接发过去就行。</p>
+            <p class="mtl-hint">版本 v0.21.6 · 数据只存在本机，请定期导出备份</p>
+            <p class="mtl-me-legal">
+              <a href="privacy.html">隐私政策</a>
+              <span>·</span>
+              <span>© 2026 <a href="https://chesterlee.cn/" target="_blank" rel="noopener">Chester</a></span>
+              <span>·</span>
+              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">陇ICP备2026009894号-2</a>
+            </p>
+          </div>
+        </details>
       </section>
     </main>
 
     <nav class="mtl-tabs" aria-label="主导航">
-      <button class="mtl-tab is-active" data-view="capture" type="button">拍一杯</button>
-      <button class="mtl-tab" data-view="archive" type="button">印章</button>
-      <button class="mtl-tab" data-view="map" type="button">地图</button>
+      <button class="mtl-tab is-active" data-view="capture" type="button" aria-label="拍一杯">
+        <svg class="mtl-tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 8.8h3.2l1.4-2.2h6.8l1.4 2.2H20v9.6H4z" />
+          <circle cx="12" cy="13.4" r="3.4" />
+        </svg>
+      </button>
+      <button class="mtl-tab" data-view="archive" type="button" aria-label="印章">
+        <svg class="mtl-tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="10.8" r="6.2" />
+          <circle cx="12" cy="10.8" r="2.4" />
+          <path d="M7.4 19.6h9.2" />
+        </svg>
+      </button>
+      <button class="mtl-tab" data-view="map" type="button" aria-label="地图">
+        <svg class="mtl-tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 20.6s6.2-6 6.2-10.1a6.2 6.2 0 1 0-12.4 0C5.8 14.6 12 20.6 12 20.6z" />
+          <circle cx="12" cy="10.3" r="2.3" />
+        </svg>
+      </button>
+      <button class="mtl-tab" data-view="me" type="button" aria-label="我的">
+        <svg class="mtl-tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="8.4" r="3.6" />
+          <path d="M5.4 20c.7-3.6 3.5-5.6 6.6-5.6s5.9 2 6.6 5.6" />
+        </svg>
+      </button>
     </nav>
+  </div>
 
-    <footer class="mtl-footer">
-      <span>v0.5.5 · 验证版 · 数据只存在本机</span>
-      <a href="privacy.html">隐私政策</a>
-      <span>© 2026 Chester · <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">陇ICP备2026009894号-2</a></span>
-    </footer>
+  <!-- 自定义相机：点首页快门后全屏取景（右下角相册入口也在这里） -->
+  <div id="mtl-camera" class="mtl-camera" hidden>
+    <video id="mtl-camera-video" class="mtl-camera-video" playsinline muted autoplay></video>
+    <div class="mtl-camera-frame" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <div class="mtl-camera-top">
+      <button type="button" id="mtl-camera-close" class="mtl-camera-round" aria-label="关闭相机">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+      </button>
+      <button type="button" id="mtl-camera-flash" class="mtl-camera-round" aria-label="闪光灯">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L6 13h4.5L9.5 21 17 10.5h-4.6z" /></svg>
+      </button>
+    </div>
+    <p class="mtl-camera-tip">照片只用于本次识别，服务端不保存</p>
+    <div class="mtl-camera-bottom">
+      <label class="mtl-camera-round mtl-camera-album" for="mtl-gallery-input" aria-label="从相册选照片">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3.5" y="5.2" width="17" height="13.6" rx="2.6" />
+          <circle cx="8.7" cy="10.1" r="1.4" />
+          <path d="M4.4 16.4l4.5-4.2 3.3 3 2.6-2.1 4.8 4.3" />
+        </svg>
+      </label>
+      <button type="button" id="mtl-camera-shot" class="mtl-camera-shot" aria-label="拍下这一杯"></button>
+      <span class="mtl-camera-blank" aria-hidden="true"></span>
+    </div>
   </div>
 
   <div id="mtl-detail" class="mtl-modal" hidden>
@@ -213,6 +469,20 @@
       <label>日期
         <input id="mtl-detail-date" type="date">
       </label>
+      <div class="mtl-time-block">
+        <div class="mtl-time-head">
+          <span class="mtl-time-label">时间段（选填）</span>
+          <span class="mtl-time-tip">再点一下取消</span>
+        </div>
+        <div id="mtl-detail-time" class="mtl-chips" role="radiogroup" aria-label="时间段" data-value=""></div>
+      </div>
+      <div class="mtl-mood-block">
+        <div class="mtl-mood-head">
+          <span class="mtl-mood-title">这一刻的心情</span>
+          <span class="mtl-mood-tip">再点一下取消</span>
+        </div>
+        <div id="mtl-detail-mood" class="mtl-mood-picker" role="radiogroup" aria-label="这一刻的心情" data-value=""></div>
+      </div>
       <div class="mtl-row">
         <label>品牌
           <input id="mtl-detail-brand" autocomplete="off">
@@ -221,12 +491,16 @@
           <input id="mtl-detail-price" type="number" min="0" step="0.1" inputmode="decimal">
         </label>
       </div>
+      <div id="mtl-detail-brand-chips" class="mtl-chips mtl-brand-chips" role="group" aria-label="品牌"></div>
       <div class="mtl-row">
         <label>城市
-          <input id="mtl-detail-city" autocomplete="off">
+          <span class="mtl-pick-field">
+            <input id="mtl-detail-city" placeholder="点我选城市" readonly autocomplete="off">
+            <span class="mtl-pick-caret" aria-hidden="true">›</span>
+          </span>
         </label>
         <label>区
-          <input id="mtl-detail-district" autocomplete="off">
+          <input id="mtl-detail-district" placeholder="自动定位 / 可手填" autocomplete="off">
         </label>
       </div>
       <div class="mtl-row">
@@ -275,9 +549,13 @@
         </div>
         <button type="button" id="mtl-detail-rating-clear" class="mtl-link">清除</button>
       </div>
-      <label>备注 / 心情
+      <label>备注（选填）
         <input id="mtl-detail-note" autocomplete="off">
       </label>
+      <div id="mtl-detail-voice" class="mtl-detail-voice" hidden>
+        <span class="mtl-price-label">这条语音备注</span>
+        <audio id="mtl-detail-audio" controls preload="metadata"></audio>
+      </div>
       <p id="mtl-detail-meta" class="mtl-hint"></p>
       <div class="mtl-actions">
         <button id="mtl-detail-sticker" class="mtl-btn" type="button">生成贴纸</button>
@@ -287,73 +565,6 @@
         <button id="mtl-detail-save" class="mtl-btn mtl-btn-primary" type="button">保存修改</button>
         <button id="mtl-detail-delete" class="mtl-btn mtl-btn-danger" type="button">删除</button>
       </div>
-    </div>
-  </div>
-
-  <div id="mtl-me" class="mtl-modal" hidden>
-    <div class="mtl-modal-backdrop" data-close="1"></div>
-    <div class="mtl-sheet mtl-me-sheet" role="dialog" aria-modal="true" aria-labelledby="mtl-me-title">
-      <div class="mtl-sheet-head">
-        <h3 id="mtl-me-title">我的</h3>
-        <button type="button" class="mtl-icon-btn" data-close="1" aria-label="关闭">×</button>
-      </div>
-
-      <div class="mtl-me-cards">
-        <div class="mtl-me-card"><strong id="mtl-me-total">0</strong><span>总杯数</span></div>
-        <div class="mtl-me-card"><strong id="mtl-me-brands">0</strong><span>品牌</span></div>
-        <div class="mtl-me-card"><strong id="mtl-me-streak">0</strong><span>连续天</span></div>
-      </div>
-
-      <section class="mtl-block">
-        <div class="mtl-section-head">
-          <h4>统计</h4>
-          <div id="mtl-period" class="mtl-period">
-            <button type="button" data-period="week">本周</button>
-            <button type="button" data-period="month" class="is-active">本月</button>
-            <button type="button" data-period="year">今年</button>
-          </div>
-        </div>
-        <div class="mtl-stat-row">
-          <div><strong id="mtl-stat-cups">0</strong><span>杯</span></div>
-          <div><strong id="mtl-stat-spend">—</strong><span>花费</span></div>
-          <div><strong id="mtl-stat-avg">—</strong><span>均价</span></div>
-        </div>
-        <p id="mtl-stat-empty" class="mtl-empty" hidden>这段时间还没有记录。</p>
-        <div class="mtl-top">
-          <div>
-            <h5>最爱品牌</h5>
-            <ol id="mtl-top-brands" class="mtl-top-list"></ol>
-          </div>
-          <div>
-            <h5>最爱饮品</h5>
-            <ol id="mtl-top-drinks" class="mtl-top-list"></ol>
-          </div>
-        </div>
-        <h5 class="mtl-heat-title">近 12 周</h5>
-        <div id="mtl-heatmap" class="mtl-heatmap" aria-label="近 12 周记录热力图"></div>
-        <p class="mtl-hint">颜色越深，那天记的杯数越多。</p>
-      </section>
-
-      <section class="mtl-block">
-        <h4>徽章</h4>
-        <div id="mtl-badges" class="mtl-badges"></div>
-      </section>
-
-      <section class="mtl-block">
-        <h4>主题色</h4>
-        <div id="mtl-themes" class="mtl-themes">
-          <button type="button" data-theme="caramel"><span class="mtl-swatch"></span>焦糖</button>
-          <button type="button" data-theme="matcha"><span class="mtl-swatch"></span>抹茶</button>
-          <button type="button" data-theme="sakura"><span class="mtl-swatch"></span>樱花</button>
-          <button type="button" data-theme="blueberry"><span class="mtl-swatch"></span>蓝莓</button>
-        </div>
-      </section>
-
-      <section class="mtl-block">
-        <h4>关于</h4>
-        <p class="mtl-hint">记录与照片只存在本机浏览器；识别时照片会上传到自有服务端并转发给模型，服务端不保存照片。</p>
-        <p class="mtl-hint">版本 v0.5.5 · 验证版</p>
-      </section>
     </div>
   </div>
 
@@ -369,14 +580,84 @@
         <button id="mtl-share-save" class="mtl-btn mtl-btn-primary" type="button">保存图片</button>
         <button id="mtl-share-do" class="mtl-btn" type="button">分享</button>
       </div>
-      <p class="mtl-hint">卡片只含饮品、规格、杯数、花费和评分，不含备注与位置。</p>
+      <p class="mtl-hint">卡片只含饮品、品牌、规格、杯数、花费和评分，不含备注与位置。</p>
+    </div>
+  </div>
+
+  <!-- 选城市：可上下滑动挑 + 搜索，也能一键用当前位置 -->
+  <div id="mtl-city-sheet" class="mtl-modal mtl-modal-top" hidden>
+    <div class="mtl-modal-backdrop" data-close="1"></div>
+    <div class="mtl-sheet mtl-city-sheet" role="dialog" aria-modal="true" aria-labelledby="mtl-city-title">
+      <div class="mtl-sheet-head">
+        <h3 id="mtl-city-title">选城市</h3>
+        <button type="button" class="mtl-icon-btn" data-close="1" aria-label="关闭">×</button>
+      </div>
+      <button type="button" id="mtl-city-locate" class="mtl-btn mtl-city-locate">用当前位置自动填</button>
+      <input id="mtl-city-search" placeholder="搜城市，如：杭州" autocomplete="off">
+      <div id="mtl-city-hot" class="mtl-city-hot" role="group" aria-label="常去的城市"></div>
+      <div id="mtl-city-list" class="mtl-city-list" role="listbox" aria-label="城市"></div>
+      <div class="mtl-city-manual">
+        <button type="button" id="mtl-city-manual-toggle" class="mtl-link">找不到？手填城市</button>
+        <input id="mtl-city-manual" placeholder="输入城市名，如：义乌市" autocomplete="off" hidden>
+      </div>
+      <p id="mtl-city-status" class="mtl-status" role="status"></p>
+    </div>
+  </div>
+
+  <div id="mtl-brand-more" class="mtl-modal" hidden>
+    <div class="mtl-modal-backdrop" data-close="1"></div>
+    <div class="mtl-sheet" role="dialog" aria-modal="true" aria-labelledby="mtl-brand-more-title">
+      <div class="mtl-sheet-head">
+        <h3 id="mtl-brand-more-title">全部品牌</h3>
+        <button type="button" class="mtl-icon-btn" data-close="1" aria-label="关闭">×</button>
+      </div>
+      <div id="mtl-brand-more-chips" class="mtl-chips mtl-brand-chips" role="group" aria-label="全部品牌"></div>
+      <p class="mtl-hint">没有你的品牌？关掉这里点「手填」，直接写名字。</p>
+    </div>
+  </div>
+
+  <div id="mtl-install-tip" class="mtl-modal" hidden>
+    <div class="mtl-modal-backdrop" data-install-close="1"></div>
+    <div class="mtl-sheet mtl-install-tip" role="dialog" aria-modal="true" aria-labelledby="mtl-install-tip-title">
+      <div class="mtl-sheet-head">
+        <h3 id="mtl-install-tip-title">把「拍一杯」放到桌面</h3>
+        <button type="button" class="mtl-icon-btn" data-install-close="1" aria-label="关闭">×</button>
+      </div>
+      <p class="mtl-install-hint">下次点图标就能直接打开，像一个小 App。</p>
+      <div class="mtl-install-item">
+        <strong>iPhone</strong>
+        <p>Safari 打开本页 → 「分享」→「添加到主屏幕」</p>
+      </div>
+      <div class="mtl-install-item">
+        <strong>安卓</strong>
+        <p>Chrome 打开本页 → 右上角「⋮」→「添加到主屏幕」</p>
+      </div>
+      <p class="mtl-install-wechat">在微信里打开时，先点右上角「···」→「在浏览器打开」。</p>
+      <button type="button" id="mtl-install-tip-ok" class="mtl-btn mtl-btn-primary">知道了</button>
+    </div>
+  </div>
+
+  <div id="mtl-menu-search" class="mtl-modal" hidden>
+    <div class="mtl-modal-backdrop" data-close="1"></div>
+    <div class="mtl-sheet" role="dialog" aria-modal="true" aria-labelledby="mtl-menu-search-title">
+      <div class="mtl-sheet-head">
+        <h3 id="mtl-menu-search-title">搜饮品名</h3>
+        <button type="button" class="mtl-icon-btn" data-close="1" aria-label="关闭">×</button>
+      </div>
+      <input id="mtl-menu-search-input" placeholder="搜饮品名或品牌，如：杨枝甘露" autocomplete="off">
+      <div id="mtl-menu-search-list" class="mtl-menu-results"></div>
+      <p class="mtl-hint">菜单只收常见单品；没搜到就关掉这里直接手写，不影响保存。</p>
     </div>
   </div>
 
   <div id="mtl-toast" class="mtl-toast" role="status" aria-live="polite"></div>
 
-  <script src="assets/vendor/leaflet/leaflet.js"></script>
+  <script src="assets/js/log.js"></script>
+  <script src="assets/js/brands.js"></script>
+  <script src="assets/js/menu.js"></script>
   <script src="assets/js/recognize.js"></script>
+  <script src="assets/js/voice.js"></script>
   <script src="assets/js/app.js"></script>
+  <script src="assets/js/account.js"></script>
 </body>
 </html>

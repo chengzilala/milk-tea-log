@@ -2,5 +2,8 @@
   "folders": [
     { "path": "." }
   ],
-  "settings": {}
+"settings": {},
+"trae": {
+	"workspaceId": "151e2b32f4f00f04d1184a6f713b4eac"
+}
 }

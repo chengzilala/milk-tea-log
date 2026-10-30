@@ -10,7 +10,7 @@ window.MtlRecognize = {
 
   /**
    * @param {Blob} imageBlob 已压缩的 JPEG
-   * @returns {Promise<{drinkName:string, category:string, confidence:number, mock?:boolean}>}
+   * @returns {Promise<{drinkName:string, brand:string, category:string, priceHint:number, confidence:number, mock?:boolean}>}
    */
   async recognize(imageBlob) {
     if (!imageBlob) throw new Error("没有可识别的图片");

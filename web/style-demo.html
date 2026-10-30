@@ -1,0 +1,1276 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>拍一杯 · 4 套风格方案</title>
+<style>
+  * { box-sizing: border-box; }
+
+  button { font: inherit; }
+
+  :root {
+    --page: #e9e5de;
+    --page-ink: #2a2724;
+    --page-muted: #7c746b;
+  }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background:
+      radial-gradient(circle at 8% -2%, #f7f3ec 0, transparent 46%),
+      radial-gradient(circle at 96% 4%, #f0e8dc 0, transparent 40%),
+      var(--page);
+    color: var(--page-ink);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+      "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page-head {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 56px 24px 8px;
+  }
+
+  .kicker {
+    margin: 0 0 10px;
+    color: var(--page-muted);
+    font-size: 12px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+
+  .page-head h1 {
+    margin: 0 0 12px;
+    font-size: clamp(26px, 4vw, 40px);
+    font-weight: 800;
+    letter-spacing: -.02em;
+  }
+
+  .lede {
+    max-width: 640px;
+    margin: 0;
+    color: #5f574e;
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  .jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 22px;
+  }
+
+  .jump a {
+    padding: 8px 14px;
+    border: 1px solid rgba(42, 39, 36, .16);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .7);
+    color: #34302c;
+    font-size: 12.5px;
+    text-decoration: none;
+  }
+
+  .jump a:hover { background: #fff; }
+
+  .demos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(390px, 1fr));
+    justify-items: center;
+    gap: 56px 30px;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 34px 24px 72px;
+  }
+
+  .demo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .demo-head {
+    width: min(390px, 100%);
+  }
+
+  .tag {
+    display: inline-block;
+    margin-bottom: 8px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #2a2724;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+  }
+
+  .demo-head h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .demo-head p {
+    margin: 0;
+    color: #6b6259;
+    font-size: 12.5px;
+    line-height: 1.7;
+  }
+
+  .demo-head .pick {
+    display: block;
+    margin-top: 8px;
+    color: #9a6b45;
+    font-size: 12px;
+  }
+
+  /* ---------- 手机外框 ---------- */
+  .phone {
+    position: relative;
+    width: min(390px, 100%);
+    height: 844px;
+    padding: 7px;
+    border-radius: 48px;
+    background: #16151a;
+    box-shadow:
+      0 40px 70px -30px rgba(40, 30, 20, .45),
+      0 0 0 1px rgba(255, 255, 255, .1) inset;
+  }
+
+  .screen {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 41px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .island {
+    position: absolute;
+    top: 9px;
+    left: 50%;
+    z-index: 5;
+    width: 96px;
+    height: 25px;
+    border-radius: 999px;
+    background: #111014;
+    transform: translateX(-50%);
+  }
+
+  .sb {
+    position: relative;
+    z-index: 4;
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    height: 46px;
+    padding: 8px 26px 0;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+
+  .sb-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sb-5g { font-size: 10.5px; font-weight: 700; opacity: .8; }
+
+  .sb-batt {
+    position: relative;
+    display: block;
+    width: 22px;
+    height: 11px;
+    padding: 1.4px;
+    border: 1.2px solid currentColor;
+    border-radius: 3.5px;
+    opacity: .85;
+  }
+
+  .sb-batt i {
+    display: block;
+    width: 72%;
+    height: 100%;
+    border-radius: 1.6px;
+    background: currentColor;
+  }
+
+  .sb-batt::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    right: -3px;
+    width: 1.6px;
+    height: 4px;
+    border-radius: 0 2px 2px 0;
+    background: currentColor;
+  }
+
+  /* ---------- 通用元素 ---------- */
+  .pad {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    padding: 2px 20px 92px;
+  }
+
+  .drink {
+    display: block;
+    width: 110px;
+    height: auto;
+    aspect-ratio: 120 / 170;
+  }
+
+  .stk {
+    filter:
+      drop-shadow(2.5px 0 0 #fff) drop-shadow(-2.5px 0 0 #fff)
+      drop-shadow(0 2.5px 0 #fff) drop-shadow(0 -2.5px 0 #fff)
+      drop-shadow(0 10px 14px rgba(40, 30, 20, .16));
+  }
+
+  .float-nav {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    z-index: 6;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    height: 66px;
+    padding: 0 8px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, .96);
+    box-shadow: 0 12px 28px rgba(40, 30, 20, .16), 0 0 0 1px rgba(40, 30, 20, .05);
+    backdrop-filter: blur(10px);
+  }
+
+  .nav-item {
+    display: grid;
+    justify-items: center;
+    gap: 3px;
+    color: #96908a;
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+
+  .nav-item.is-on { color: #1f1d1a; }
+
+  .ico {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* =========================================================
+     方案 A · 纸感贴纸
+     ========================================================= */
+  .s-a {
+    background-color: #f6f4ee;
+    background-image: radial-gradient(rgba(31, 43, 56, .10) 1.1px, transparent 1.2px);
+    background-size: 15px 15px;
+    color: #1f2b38;
+  }
+
+  .a-top {
+    display: flex;
+    flex: none;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 4px;
+  }
+
+  .a-date {
+    margin: 0 0 6px;
+    color: #8d867c;
+    font-size: 11.5px;
+    letter-spacing: .04em;
+  }
+
+  .a-hi {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+  }
+
+  .a-sub {
+    margin: 5px 0 0;
+    color: #8d867c;
+    font-size: 12.5px;
+  }
+
+  .a-logo {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 11px 6px 7px;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(40, 30, 20, .1);
+    color: #1f2b38;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .a-logo i {
+    display: block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffd977, #f0b93c);
+  }
+
+  .a-cluster {
+    position: relative;
+    flex: 1;
+    min-height: 250px;
+    margin-top: 6px;
+  }
+
+  .a-s1 {
+    position: absolute;
+    top: 47%;
+    left: 50%;
+    width: 158px;
+    transform: translate(-50%, -55%) rotate(3deg);
+  }
+
+  .a-s1 .drink { width: 158px; }
+
+  .a-s2 {
+    position: absolute;
+    top: 36%;
+    left: 6px;
+    width: 104px;
+    transform: rotate(-9deg);
+  }
+
+  .a-s2 .drink { width: 104px; }
+
+  .a-s3 {
+    position: absolute;
+    top: 45%;
+    right: 2px;
+    width: 98px;
+    transform: rotate(8deg);
+  }
+
+  .a-s3 .drink { width: 98px; }
+
+  .a-label {
+    position: absolute;
+    top: 74%;
+    left: 50%;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 8px 18px rgba(40, 30, 20, .16);
+    color: #1f2b38;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    transform: translateX(-62%) rotate(-4deg);
+  }
+
+  .a-label-small {
+    position: absolute;
+    top: 84%;
+    left: 50%;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .9);
+    box-shadow: 0 6px 14px rgba(40, 30, 20, .12);
+    color: #7b746a;
+    font-size: 10.5px;
+    white-space: nowrap;
+    transform: translateX(-20%) rotate(2deg);
+  }
+
+  .spark {
+    position: absolute;
+    border-radius: 50%;
+    background: #f0b93c;
+  }
+
+  .sp1 { top: 26px; left: 18%; width: 7px; height: 7px; opacity: .55; }
+  .sp2 { top: 132px; right: 24%; width: 5px; height: 5px; opacity: .45; }
+  .sp3 { top: 176px; left: 24%; width: 4px; height: 4px; opacity: .5; }
+
+  .a-cta { flex: none; padding-top: 4px; }
+
+  .pill-black {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: 54px;
+    border: 0;
+    border-radius: 999px;
+    background: #1c1c1e;
+    color: #fff;
+    font-size: 15.5px;
+    font-weight: 800;
+    letter-spacing: .02em;
+  }
+
+  .a-ghost {
+    margin: 9px 0 0;
+    color: #8d867c;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .a-stamps { flex: none; padding-top: 18px; }
+
+  .a-stamps-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .a-stamps-head strong { font-size: 14px; font-weight: 800; }
+
+  .a-stamps-head span { color: #8d867c; font-size: 11px; }
+
+  .a-stamps-row {
+    display: flex;
+    padding-left: 6px;
+  }
+
+  .a-stamp {
+    display: grid;
+    width: 56px;
+    height: 56px;
+    margin-left: -12px;
+    place-items: center;
+    overflow: hidden;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 6px 14px rgba(40, 30, 20, .15);
+    background: #efe8dc;
+  }
+
+  .a-stamp:nth-child(odd) { transform: rotate(-5deg); }
+  .a-stamp:nth-child(even) { transform: rotate(4deg) translateY(3px); }
+
+  .a-stamp .drink { width: 46px; filter: none; }
+
+  /* =========================================================
+     方案 B · 暖棕展台
+     ========================================================= */
+  .s-b {
+    background: radial-gradient(circle at 50% 30%, #bb9480 0%, #a67f68 52%, #97705a 100%);
+    color: #fff;
+  }
+
+  .s-b .sb-5g,
+  .s-b .sb-batt { opacity: .75; }
+
+  .b-top {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 4px 0;
+  }
+
+  .b-date {
+    color: rgba(255, 255, 255, .72);
+    font-size: 12px;
+    letter-spacing: .04em;
+  }
+
+  .b-ai {
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .16);
+    color: rgba(255, 255, 255, .92);
+    font-size: 10px;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+  }
+
+  .b-stage {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    padding-bottom: 8px;
+  }
+
+  .b-stage .drink { width: 246px; }
+
+  .b-name {
+    margin: 18px 0 0;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: .01em;
+  }
+
+  .b-meta {
+    margin: 5px 0 0;
+    color: rgba(255, 255, 255, .62);
+    font-size: 11.5px;
+  }
+
+  .b-bubble {
+    position: relative;
+    flex: none;
+    align-self: center;
+    margin-top: 26px;
+    padding: 9px 15px;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 10px 22px rgba(40, 30, 20, .22);
+    color: #2b2622;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .b-bubble::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    background: #fff;
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  .b-actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    padding: 6px 0 10px;
+  }
+
+  .b-round {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, .22);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .14);
+    color: #fff;
+    backdrop-filter: blur(6px);
+  }
+
+  .b-round .ico { width: 21px; height: 21px; }
+
+  .b-check {
+    display: grid;
+    width: 74px;
+    height: 74px;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 14px 30px rgba(40, 20, 10, .28);
+    color: #e3973f;
+  }
+
+  .b-check .ico { width: 30px; height: 30px; stroke-width: 2.2; }
+
+  .b-foot {
+    flex: none;
+    padding: 2px 0 22px;
+    color: rgba(255, 255, 255, .55);
+    font-size: 10.5px;
+    text-align: center;
+  }
+
+  /* =========================================================
+     方案 C · 彩色贴纸卡
+     ========================================================= */
+  .s-c {
+    background-color: #f8f6f0;
+    background-image: radial-gradient(rgba(31, 43, 56, .085) 1.1px, transparent 1.2px);
+    background-size: 16px 16px;
+    color: #1e2430;
+  }
+
+  .c-head {
+    display: flex;
+    flex: none;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 2px 2px 14px;
+  }
+
+  .c-date {
+    margin: 0 0 4px;
+    color: #8b857c;
+    font-size: 11px;
+  }
+
+  .c-head h3 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+  }
+
+  .c-count {
+    padding: 6px 11px;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(40, 30, 20, .1);
+    color: #4a4640;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .c-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 13px;
+    flex: none;
+  }
+
+  .c-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 200px;
+    overflow: hidden;
+    padding: 12px 13px 11px;
+    border-radius: 24px;
+    color: #fff;
+    box-shadow: 0 12px 22px rgba(60, 40, 25, .16);
+  }
+
+  .c-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, .32) 1px, transparent 1.1px);
+    background-size: 9px 9px;
+    opacity: .35;
+    pointer-events: none;
+  }
+
+  .c-card:nth-child(odd) { transform: rotate(-1.4deg); }
+  .c-card:nth-child(even) { transform: rotate(1.2deg); }
+
+  .c-card .drink {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 92px;
+  }
+
+  .c-name {
+    position: relative;
+    margin-top: auto;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -.01em;
+  }
+
+  .c-meta {
+    position: relative;
+    margin-top: 3px;
+    font-size: 10px;
+    opacity: .82;
+  }
+
+  .c-coral { background: linear-gradient(160deg, #f4867233, transparent 40%), #ef7c6b; }
+  .c-butter { background: linear-gradient(160deg, #ffe0a133, transparent 40%), #f0c463; color: #6b4a1f; }
+  .c-matcha { background: linear-gradient(160deg, #d6efb033, transparent 40%), #9dc07c; color: #2f4222; }
+  .c-sky { background: linear-gradient(160deg, #cfe6ff33, transparent 40%), #93b6d8; color: #1f3650; }
+
+  .c-coral .c-meta, .c-matcha .c-meta, .c-sky .c-meta, .c-butter .c-meta { opacity: .78; }
+
+  .c-grow { flex: 1; min-height: 8px; }
+
+  .c-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 16px;
+    padding: 12px 8px;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(40, 30, 20, .07);
+    text-align: center;
+  }
+
+  .c-stats div {
+    display: grid;
+    gap: 2px;
+  }
+
+  .c-stats strong {
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .c-stats span {
+    color: #8b857c;
+    font-size: 10px;
+  }
+
+  .c-cta { flex: none; padding-bottom: 10px; }
+
+  /* =========================================================
+     方案 D · 极简留白
+     ========================================================= */
+  .s-d {
+    background: #fbfaf7;
+    color: #241f1c;
+  }
+
+  .d-top {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 2px 0;
+  }
+
+  .d-wordmark {
+    color: #8b7f73;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .26em;
+  }
+
+  .d-count { color: #8b7f73; font-size: 11px; }
+
+  .d-title {
+    margin: 26px 0 0;
+    font-family: "Songti SC", "Noto Serif SC", "STSong", serif;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.18;
+    letter-spacing: .01em;
+  }
+
+  .d-sub {
+    margin: 8px 0 0;
+    color: #8b7f73;
+    font-size: 12px;
+    letter-spacing: .02em;
+  }
+
+  .d-rule {
+    flex: none;
+    height: 1px;
+    margin: 20px 0 18px;
+    background: #e7e1d7;
+  }
+
+  .d-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    flex: none;
+  }
+
+  .d-card {
+    padding: 7px 7px 9px;
+    background: #fff;
+    box-shadow: 0 12px 24px rgba(60, 45, 30, .08);
+  }
+
+  .d-card:nth-child(1) { transform: rotate(-1.6deg); }
+  .d-card:nth-child(2) { transform: rotate(1.2deg); }
+  .d-card:nth-child(3) { transform: rotate(1.4deg); }
+  .d-card:nth-child(4) { transform: rotate(-1.1deg); }
+
+  .d-photo {
+    display: grid;
+    height: 112px;
+    place-items: center;
+    overflow: hidden;
+  }
+
+  .d-photo .drink { width: 84px; filter: drop-shadow(0 8px 10px rgba(40, 30, 20, .12)); }
+
+  .d-photo.p1 { background: #f2ece2; }
+  .d-photo.p2 { background: #eef1e8; }
+  .d-photo.p3 { background: #f7eceb; }
+  .d-photo.p4 { background: #eef0f4; }
+
+  .d-name {
+    margin-top: 7px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .d-meta {
+    margin-top: 1px;
+    color: #a2998e;
+    font-size: 9.5px;
+  }
+
+  .d-grow { flex: 1; min-height: 8px; }
+
+  .d-cta {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 52px;
+    padding: 0 20px;
+    border: 1px solid #241f1c;
+    border-radius: 999px;
+    background: transparent;
+    color: #241f1c;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: .02em;
+  }
+
+  .d-cta .arrow { font-size: 16px; }
+
+  .d-nav {
+    position: absolute;
+    right: 26px;
+    bottom: 22px;
+    left: 26px;
+    z-index: 6;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding-top: 12px;
+    border-top: 1px solid #ece6dc;
+    color: #a2998e;
+    font-size: 11px;
+    letter-spacing: .08em;
+  }
+
+  .d-nav .is-on {
+    position: relative;
+    color: #241f1c;
+    font-weight: 600;
+  }
+
+  .d-nav .is-on::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: -7px;
+    left: 0;
+    height: 1px;
+    background: #241f1c;
+  }
+
+  .page-foot {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 24px 64px;
+    color: #7c746b;
+    font-size: 12px;
+    line-height: 1.8;
+    text-align: center;
+  }
+
+  @media (max-width: 460px) {
+    .page-head { padding-top: 36px; }
+    .demos { grid-template-columns: 1fr; gap: 44px; padding-inline: 14px; }
+    .phone { height: 800px; }
+    .d-title { font-size: 38px; }
+    .c-card { height: 166px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 图形素材（inline，无外部依赖） -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="cup" viewBox="0 0 120 170">
+    <style>
+      .cup-body { fill: var(--liquid, #c9a077); }
+      .cup-shade { fill: #000; opacity: .10; }
+      .cup-foam { fill: #fff; opacity: .20; }
+      .cup-lid { fill: var(--lid, #fffdf8); }
+      .cup-lid2 { fill: var(--lid2, #ece5d9); }
+      .cup-straw { stroke: var(--straw, #e6a2aa); stroke-width: 8; stroke-linecap: round; fill: none; }
+      .cup-shine { stroke: #fff; stroke-width: 6; stroke-linecap: round; fill: none; opacity: .30; }
+      .cup-pearl { fill: var(--pearl, #5b3a28); }
+    </style>
+    <path class="cup-straw" d="M78 12 L66 62" />
+    <path class="cup-lid" d="M24 50 Q60 28 96 50 L98 63 L22 63 Z" />
+    <rect class="cup-lid2" x="22" y="57" width="76" height="11" rx="5.5" />
+    <path class="cup-body" d="M31 69 L89 69 L83 154 Q83 162 75 162 L45 162 Q37 162 37 154 Z" />
+    <path class="cup-shade" d="M31 69 L89 69 L83 154 Q83 162 75 162 L67 162 L75 69 Z" />
+    <path class="cup-foam" d="M38 77 L82 77 L80 91 L40 91 Z" />
+    <path class="cup-shine" d="M46 82 Q42 112 46 140" />
+    <circle class="cup-pearl" cx="50" cy="150" r="4.2" />
+    <circle class="cup-pearl" cx="61" cy="152" r="4.2" />
+    <circle class="cup-pearl" cx="71" cy="149" r="4.2" />
+    <circle class="cup-pearl" cx="55" cy="141" r="4" />
+    <circle class="cup-pearl" cx="66" cy="140" r="4" />
+  </symbol>
+
+  <symbol id="i-camera" viewBox="0 0 24 24">
+    <rect x="3" y="7" width="18" height="13" rx="4.2" />
+    <path d="M9 7l1.6-2.6h2.8L15 7" />
+    <circle cx="12" cy="13.4" r="3.4" />
+  </symbol>
+  <symbol id="i-album" viewBox="0 0 24 24">
+    <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+    <path d="M7.5 14.5l3-3 2.2 2.2 3.8-3.7" />
+    <circle cx="9" cy="8.6" r="1.2" />
+  </symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24">
+    <path d="M12 21s6.2-5.6 6.2-10.2A6.2 6.2 0 1 0 5.8 10.8C5.8 15.4 12 21 12 21z" />
+    <circle cx="12" cy="10.5" r="2.2" />
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24">
+    <path d="M4.5 12.6l5 5L19.5 7" />
+  </symbol>
+  <symbol id="i-redo" viewBox="0 0 24 24">
+    <path d="M4 12a8 8 0 1 0 2.9-6.2" />
+    <path d="M4.2 4.2v5.2h5.2" />
+  </symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24">
+    <path d="M4 20l4.2-1L19 8.2 15.8 5 5 15.8z" />
+    <path d="M14.2 6.6l3.2 3.2" />
+  </symbol>
+</svg>
+
+<header class="page-head">
+  <p class="kicker">拍一杯 · Visual Direction</p>
+  <h1>4 套风格，选一个继续做</h1>
+  <p class="lede">
+    参考你圈出来的 CapWords：贴纸、圆角、粗字、纸感留白。把它和「奶茶印章」结合后，
+    给出 4 个方向。A 最接近你喜欢的那套；B 适合拍完确认的那一下；C 是印章册的彩色版；D 更克制耐看。
+  </p>
+  <nav class="jump">
+    <a href="#demo-a">A · 纸感贴纸</a>
+    <a href="#demo-b">B · 暖棕展台</a>
+    <a href="#demo-c">C · 彩色贴纸卡</a>
+    <a href="#demo-d">D · 极简留白</a>
+  </nav>
+</header>
+
+<main class="demos">
+
+  <!-- ============ A ============ -->
+  <section class="demo" id="demo-a">
+    <div class="demo-head">
+      <span class="tag">方案 A</span>
+      <h2>纸感贴纸 · Paper Sticker</h2>
+      <p>点阵纸底 + 漂浮的贴纸 + 黑色胶囊按钮，最贴近你喜欢的 CapWords。收集感强，像在贴一本贴纸册。</p>
+      <span class="pick">推荐：作为整体主风格</span>
+    </div>
+    <div class="phone">
+      <div class="screen s-a">
+        <div class="island"></div>
+        <div class="sb">
+          <span>10:39</span>
+          <span class="sb-right"><span class="sb-5g">5G</span><i class="sb-batt"><i></i></i></span>
+        </div>
+
+        <div class="pad">
+          <div class="a-top">
+            <div>
+              <p class="a-date">10月22 · 周三</p>
+              <h3 class="a-hi">下午好 :-)</h3>
+              <p class="a-sub">今天也要拍一杯。</p>
+            </div>
+            <span class="a-logo"><i></i>拍一杯</span>
+          </div>
+
+          <div class="a-cluster">
+            <span class="spark sp1"></span>
+            <span class="spark sp2"></span>
+            <span class="spark sp3"></span>
+            <div class="a-s2">
+              <svg class="drink stk" style="--liquid:#a9c27f;--straw:#87a45f;--lid:#fffdf6;--lid2:#eae5cf" viewBox="0 0 120 170"><use href="#cup" /></svg>
+            </div>
+            <div class="a-s3">
+              <svg class="drink stk" style="--liquid:#e9a3ad;--straw:#d97f8d;--lid:#fffbfb;--lid2:#f0dfe1" viewBox="0 0 120 170"><use href="#cup" /></svg>
+            </div>
+            <div class="a-s1">
+              <svg class="drink stk" style="--liquid:#c79a72;--straw:#c98d5e;--lid:#fffdf8;--lid2:#eee5d6" viewBox="0 0 120 170"><use href="#cup" /></svg>
+            </div>
+            <span class="a-label">伯牙绝弦</span>
+            <span class="a-label-small">少冰 · 三分糖</span>
+          </div>
+
+          <div class="a-cta">
+            <button class="pill-black" type="button">
+              <svg class="ico" style="width:19px;height:19px;stroke-width:2"><use href="#i-camera" /></svg>
+              拍一杯
+            </button>
+            <p class="a-ghost">从相册选 · 识别失败也能手写</p>
+          </div>
+
+          <div class="a-stamps">
+            <div class="a-stamps-head">
+              <strong>十月印章</strong>
+              <span>12 杯 · 全部 ›</span>
+            </div>
+            <div class="a-stamps-row">
+              <span class="a-stamp"><svg class="drink" style="--liquid:#c79a72" viewBox="0 0 120 170"><use href="#cup" /></svg></span>
+              <span class="a-stamp"><svg class="drink" style="--liquid:#a9c27f" viewBox="0 0 120 170"><use href="#cup" /></svg></span>
+              <span class="a-stamp"><svg class="drink" style="--liquid:#e9a3ad" viewBox="0 0 120 170"><use href="#cup" /></svg></span>
+              <span class="a-stamp"><svg class="drink" style="--liquid:#bda6d8" viewBox="0 0 120 170"><use href="#cup" /></svg></span>
+              <span class="a-stamp"><svg class="drink" style="--liquid:#b9895f" viewBox="0 0 120 170"><use href="#cup" /></svg></span>
+            </div>
+          </div>
+        </div>
+
+        <nav class="float-nav">
+          <span class="nav-item is-on">
+            <svg class="ico"><use href="#i-camera" /></svg>
+            拍一杯
+          </span>
+          <span class="nav-item">
+            <svg class="ico"><use href="#i-album" /></svg>
+            印章
+          </span>
+          <span class="nav-item">
+            <svg class="ico"><use href="#i-pin" /></svg>
+            地图
+          </span>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ B ============ -->
+  <section class="demo" id="demo-b">
+    <div class="demo-head">
+      <span class="tag">方案 B</span>
+      <h2>暖棕展台 · Warm Stage</h2>
+      <p>拍完的确认页：一杯悬浮在暖棕背景上，白色提示气泡 + 大圆勾按钮。仪式感最强，适合「收下这一杯」的瞬间。</p>
+      <span class="pick">推荐：用在拍照确认 / 识别结果页</span>
+    </div>
+    <div class="phone">
+      <div class="screen s-b">
+        <div class="island"></div>
+        <div class="sb">
+          <span>10:39</span>
+          <span class="sb-right"><span class="sb-5g">5G</span><i class="sb-batt"><i></i></i></span>
+        </div>
+
+        <div class="pad" style="padding-bottom: 20px">
+          <div class="b-top">
+            <span class="b-date">10月22 · 周三</span>
+            <span class="b-ai">AI 识别 · 伯牙绝弦</span>
+          </div>
+
+          <div class="b-stage">
+            <svg class="drink stk" style="--liquid:#cba078;--straw:#cf9364;--lid:#fffdf8;--lid2:#efe6d8" viewBox="0 0 120 170"><use href="#cup" /></svg>
+            <p class="b-name">伯牙绝弦</p>
+            <p class="b-meta">少冰 · 三分糖 · 18 元</p>
+            <div class="b-bubble">点一下 ✓，收进这个月</div>
+          </div>
+
+          <div class="b-actions">
+            <button class="b-round" type="button" aria-label="重拍">
+              <svg class="ico"><use href="#i-redo" /></svg>
+            </button>
+            <button class="b-check" type="button" aria-label="收下">
+              <svg class="ico"><use href="#i-check" /></svg>
+            </button>
+            <button class="b-round" type="button" aria-label="手动填写">
+              <svg class="ico"><use href="#i-pen" /></svg>
+            </button>
+          </div>
+
+          <p class="b-foot">十月第 12 杯 · 印章 +1</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ C ============ -->
+  <section class="demo" id="demo-c">
+    <div class="demo-head">
+      <span class="tag">方案 C</span>
+      <h2>彩色贴纸卡 · Color Pop</h2>
+      <p>把印章做成彩色卡片：珊瑚、奶油黄、抹茶绿、雾蓝，配点阵纹理。归档页最抢眼，像翻一叠贴纸卡。</p>
+      <span class="pick">推荐：用在「印章册」这一页</span>
+    </div>
+    <div class="phone">
+      <div class="screen s-c">
+        <div class="island"></div>
+        <div class="sb">
+          <span>10:39</span>
+          <span class="sb-right"><span class="sb-5g">5G</span><i class="sb-batt"><i></i></i></span>
+        </div>
+
+        <div class="pad">
+          <div class="c-head">
+            <div>
+              <p class="c-date">10月22 · 周三</p>
+              <h3>我的印章册</h3>
+            </div>
+            <span class="c-count">十月 · 12 杯</span>
+          </div>
+
+          <div class="c-grid">
+            <div class="c-card c-coral">
+              <svg class="drink" style="--liquid:#f6d2b6;--straw:#e8b48c;--lid:#fffdf8;--lid2:#f0e4d6" viewBox="0 0 120 170"><use href="#cup" /></svg>
+              <span class="c-name">伯牙绝弦</span>
+              <span class="c-meta">10.22 · 三分糖</span>
+            </div>
+            <div class="c-card c-butter">
+              <svg class="drink" style="--liquid:#a9784f;--straw:#8c5c39;--lid:#fffdf8;--lid2:#f0e6d8" viewBox="0 0 120 170"><use href="#cup" /></svg>
+              <span class="c-name">生椰拿铁</span>
+              <span class="c-meta">10.20 · 少冰</span>
+            </div>
+            <div class="c-card c-matcha">
+              <svg class="drink" style="--liquid:#b9d494;--straw:#8fae6a;--lid:#fffdf8;--lid2:#ecefd8" viewBox="0 0 120 170"><use href="#cup" /></svg>
+              <span class="c-name">抹茶奶绿</span>
+              <span class="c-meta">10.18 · 无糖</span>
+            </div>
+            <div class="c-card c-sky">
+              <svg class="drink" style="--liquid:#cbb1e2;--straw:#b195cd;--lid:#fffdf8;--lid2:#eee9f2" viewBox="0 0 120 170"><use href="#cup" /></svg>
+              <span class="c-name">多肉葡萄</span>
+              <span class="c-meta">10.15 · 正常冰</span>
+            </div>
+          </div>
+
+          <div class="c-stats">
+            <div><strong>12</strong><span>杯</span></div>
+            <div><strong>¥216</strong><span>花费</span></div>
+            <div><strong>伯牙绝弦</strong><span>最爱</span></div>
+          </div>
+
+          <div class="c-grow"></div>
+
+          <div class="c-cta">
+            <button class="pill-black" type="button">
+              <svg class="ico" style="width:19px;height:19px;stroke-width:2"><use href="#i-camera" /></svg>
+              再拍一杯
+            </button>
+          </div>
+        </div>
+
+        <nav class="float-nav">
+          <span class="nav-item">
+            <svg class="ico"><use href="#i-camera" /></svg>
+            拍一杯
+          </span>
+          <span class="nav-item is-on">
+            <svg class="ico"><use href="#i-album" /></svg>
+            印章
+          </span>
+          <span class="nav-item">
+            <svg class="ico"><use href="#i-pin" /></svg>
+            地图
+          </span>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ D ============ -->
+  <section class="demo" id="demo-d">
+    <div class="demo-head">
+      <span class="tag">方案 D</span>
+      <h2>极简留白 · Quiet Editorial</h2>
+      <p>接近白纸的底、宋体大标题、细线和拍立得式贴片。最少装饰，最耐看，也更像一本私人小册子。</p>
+      <span class="pick">推荐：想要「安静、不幼稚」就选它</span>
+    </div>
+    <div class="phone">
+      <div class="screen s-d">
+        <div class="island"></div>
+        <div class="sb">
+          <span>10:39</span>
+          <span class="sb-right"><span class="sb-5g">5G</span><i class="sb-batt"><i></i></i></span>
+        </div>
+
+        <div class="pad">
+          <div class="d-top">
+            <span class="d-wordmark">拍一杯 · MILK TEA LOG</span>
+            <span class="d-count">12 枚</span>
+          </div>
+
+          <h3 class="d-title">一杯，<br>一拍。</h3>
+          <p class="d-sub">把喝过的，慢慢贴成一本。</p>
+
+          <div class="d-rule"></div>
+
+          <div class="d-grid">
+            <div class="d-card">
+              <div class="d-photo p1">
+                <svg class="drink" style="--liquid:#c79a72;--straw:#c98d5e;--lid:#fffdf8;--lid2:#eee5d6" viewBox="0 0 120 170"><use href="#cup" /></svg>
+              </div>
+              <div class="d-name">伯牙绝弦</div>
+              <div class="d-meta">10.22 · 三分糖</div>
+            </div>
+            <div class="d-card">
+              <div class="d-photo p2">
+                <svg class="drink" style="--liquid:#a9c27f;--straw:#87a45f;--lid:#fffdf8;--lid2:#e9edd8" viewBox="0 0 120 170"><use href="#cup" /></svg>
+              </div>
+              <div class="d-name">抹茶奶绿</div>
+              <div class="d-meta">10.18 · 无糖</div>
+            </div>
+            <div class="d-card">
+              <div class="d-photo p3">
+                <svg class="drink" style="--liquid:#e9a3ad;--straw:#d97f8d;--lid:#fffdf8;--lid2:#f3e2e4" viewBox="0 0 120 170"><use href="#cup" /></svg>
+              </div>
+              <div class="d-name">芝士莓莓</div>
+              <div class="d-meta">10.12 · 少冰</div>
+            </div>
+            <div class="d-card">
+              <div class="d-photo p4">
+                <svg class="drink" style="--liquid:#bda6d8;--straw:#a98bc9;--lid:#fffdf8;--lid2:#ece7f2" viewBox="0 0 120 170"><use href="#cup" /></svg>
+              </div>
+              <div class="d-name">多肉葡萄</div>
+              <div class="d-meta">10.15 · 正常冰</div>
+            </div>
+          </div>
+
+          <div class="d-grow"></div>
+
+          <button class="d-cta" type="button">
+            拍下这一杯
+            <span class="arrow">→</span>
+          </button>
+        </div>
+
+        <nav class="d-nav">
+          <span class="is-on">拍一杯</span>
+          <span>印章</span>
+          <span>地图</span>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<p class="page-foot">
+  独立 demo，不影响现有页面；选定后再把对应样式落到 web/assets/css/style.css。<br>
+  四个方案里，A 最接近参考图，B / C / D 可以单独取一段用在确认页和归档页。
+</p>
+
+</body>
+</html>
